@@ -10,14 +10,14 @@
 [![Node](https://img.shields.io/badge/Node.js-20+-339933.svg)](https://nodejs.org/)
 [![Expo](https://img.shields.io/badge/Expo-SDK_52-000020.svg)](https://expo.dev/)
 [![libsodium](https://img.shields.io/badge/Crypto-libsodium-7c4dff.svg)](https://doc.libsodium.org/)
-[![Tests](https://img.shields.io/badge/Tests-57_passing-4caf50.svg)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-120_passing-4caf50.svg)](#testing)
 [![Security Docs](https://img.shields.io/badge/Security-Documented-f5a623.svg)](docs/SECURITY_MODEL.md)
 
 <br />
 
-A feature-complete, security-first E2EE chat skeleton implementing the **Signal Protocol** — X3DH key agreement, Double Ratchet, sealed sender, Sender Keys group messaging, safety numbers, and encrypted backups. Zero-knowledge server. 57 passing tests.
+A security-first E2EE chat implementing the **Signal Protocol** with **v2 security hardening** — post-quantum hybrid KEM, MLS-inspired TreeKEM groups, metadata resistance, key transparency, Shamir key splitting, cryptographic agility, and formal protocol state machines. Zero-knowledge server. 120 passing tests.
 
-[Live Demo](https://beko2210.github.io/cipherlink/) · [Security Model](docs/SECURITY_MODEL.md) · [Threat Model](docs/THREAT_MODEL.md) · [Crypto Design](docs/CRYPTO_LIMITS.md)
+[Live Demo](https://beko2210.github.io/cipherlink/) · [Security Model](docs/SECURITY_MODEL.md) · [Threat Model](docs/THREAT_MODEL.md) · [Crypto Design](docs/CRYPTO_LIMITS.md) · [v2 Architecture](docs/SECURITY_ARCHITECTURE_V2.md)
 
 <br />
 
@@ -30,8 +30,9 @@ A feature-complete, security-first E2EE chat skeleton implementing the **Signal 
 
 ## Overview
 
-CipherLink implements a complete Signal Protocol-based E2EE architecture:
+CipherLink implements a complete Signal Protocol-based E2EE architecture with v2 security hardening:
 
+### v1 Core Protocol
 - **X3DH key agreement** — Asynchronous session establishment with signed prekeys
 - **Double Ratchet** — Forward secrecy + post-compromise security via continuous key rotation
 - **Sealed sender** — Hide sender identity from the server
@@ -42,6 +43,16 @@ CipherLink implements a complete Signal Protocol-based E2EE architecture:
 - **Replay protection** — Client-side dedup + monotonic counters + server-side 50K cache
 - **Zero-knowledge server** — Relay never sees plaintext, keys, or sender identity
 - **Secure key storage** — iOS Keychain / Android Keystore via expo-secure-store
+
+### v2 Security Hardening
+- **Post-Quantum Hybrid KEM** — X25519 + ML-KEM-768 (Kyber) hybrid key encapsulation
+- **Cryptographic Agility** — Cipher suite negotiation with immutable suite registry
+- **TreeKEM Group Protocol** — MLS-inspired tree-based group key agreement with O(log n) updates
+- **Metadata Resistance** — Uniform 4096-byte envelopes, cover traffic, message batching
+- **Key Transparency** — Merkle tree-based verifiable key directory with signed tree heads
+- **Key Splitting** — Shamir's Secret Sharing (2-of-3) for backup key recovery
+- **SecureBuffer** — Misuse-resistant key handling with use-after-wipe detection
+- **Protocol State Machine** — Formal session lifecycle with invariant enforcement
 
 ## How It Works
 
@@ -58,21 +69,31 @@ CipherLink follows the Signal Protocol architecture:
 ## Project Structure
 
 ```
-packages/crypto/        E2EE cryptographic library (libsodium)
-  src/sodium.ts         Sodium initialization
-  src/keys.ts           X25519 keypair generation
-  src/kdf.ts            HKDF-SHA256 key derivation
-  src/envelope.ts       XChaCha20-Poly1305 encrypt/decrypt with AAD
-  src/x3dh.ts           X3DH key agreement (prekeys, signed prekeys)
-  src/ratchet.ts        Double Ratchet (DH + symmetric ratchet)
-  src/sealed-sender.ts  Sealed sender (hide sender from server)
-  src/group.ts          Sender Keys group messaging
-  src/safety-numbers.ts Safety numbers (key verification)
-  src/padding.ts        PKCS7-style message padding
-  src/replay.ts         Replay protection (dedup + counters)
-  src/backup.ts         Encrypted backup (Argon2id + XChaCha20)
-  src/base64.ts         Base64 encoding utilities
-  __tests__/            57 unit tests (vitest)
+packages/crypto/             E2EE cryptographic library (libsodium)
+  src/                       v1 Core:
+    sodium.ts                  Sodium initialization
+    keys.ts                    X25519 keypair generation
+    kdf.ts                     HKDF-SHA256 key derivation
+    envelope.ts                XChaCha20-Poly1305 encrypt/decrypt with AAD
+    x3dh.ts                    X3DH key agreement (prekeys, signed prekeys)
+    ratchet.ts                 Double Ratchet (DH + symmetric ratchet)
+    sealed-sender.ts           Sealed sender (hide sender from server)
+    group.ts                   Sender Keys group messaging
+    safety-numbers.ts          Safety numbers (key verification)
+    padding.ts                 PKCS7-style message padding
+    replay.ts                  Replay protection (dedup + counters)
+    backup.ts                  Encrypted backup (Argon2id + XChaCha20)
+    base64.ts                  Base64 encoding utilities
+  src/                       v2 Security Hardening:
+    cipher-suite.ts            Cryptographic agility (suite negotiation)
+    hybrid-kem.ts              Post-quantum hybrid KEM (X25519 + ML-KEM-768)
+    secure-buffer.ts           Misuse-resistant key handling
+    protocol-state.ts          Formal protocol state machine
+    treekem.ts                 MLS-inspired TreeKEM group protocol
+    metadata-resistance.ts     Cover traffic, batching, uniform envelopes
+    key-transparency.ts        Merkle tree key directory
+    key-splitting.ts           Shamir's Secret Sharing (2-of-3)
+  __tests__/                 120 unit tests (vitest)
 
 apps/server/            Zero-knowledge WebSocket relay (Node.js + ws)
   src/index.ts          Routing, auth, sealed sender, groups, replay dedup
@@ -120,7 +141,7 @@ Scan the QR code with Expo Go on your phone.
 ### Testing
 
 ```bash
-# Run all 57 crypto unit tests
+# Run all 120 crypto unit tests (57 v1 + 63 v2)
 pnpm test
 
 # Lint all packages
@@ -144,18 +165,26 @@ pnpm typecheck
 | Ongoing key compromise | Post-compromise security via DH ratchet |
 | MITM at key exchange | Safety numbers (60-digit verification) |
 | Sender identity leakage | Sealed sender (ephemeral DH) |
-| Message length analysis | PKCS7 padding (256-byte blocks) |
+| Message length analysis | PKCS7 padding (256-byte blocks) + uniform 4096-byte envelopes |
 | Group message forgery | Ed25519 signatures (Sender Keys) |
 | Backup exposure | Argon2id + XChaCha20-Poly1305 |
+| Quantum computing (future) | Post-quantum hybrid KEM (X25519 + ML-KEM-768) |
+| Traffic analysis | Cover traffic, message batching, timing jitter |
+| Key directory tampering | Merkle tree key transparency with signed tree heads |
+| Single point of backup failure | Shamir's Secret Sharing (2-of-3 key splitting) |
+| Key material misuse | SecureBuffer with use-after-wipe detection |
+| Protocol state confusion | Formal state machine with invariant enforcement |
+| Group scalability | TreeKEM with O(log n) update complexity |
 
 ### Known Limitations
 
 | Gap | Impact |
 |---|---|
 | No multi-device | Single keypair per device (X3DH enables async setup) |
-| Metadata timing | Connection timing patterns visible to network observer |
+| Metadata timing | Mitigated by cover traffic; full mixnet not implemented |
 | No TLS in dev | Production must use wss:// |
 | No message deletion | No remote wipe or disappearing messages |
+| PQ KEM placeholder | ML-KEM-768 wire format ready; uses X25519 internally until native Kyber available |
 
 Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Design](docs/CRYPTO_LIMITS.md)**
 
@@ -163,17 +192,19 @@ Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Design](docs
 
 | Component | Technology | Purpose |
 |---|---|---|
-| Cryptography | libsodium-wrappers-sumo | X25519, Ed25519, HKDF, XChaCha20-Poly1305, Argon2id |
+| Cryptography | libsodium-wrappers-sumo | X25519, Ed25519, BLAKE2b, HKDF, XChaCha20-Poly1305, Argon2id, ML-KEM-768 (hybrid) |
 | Mobile | Expo (React Native) | iOS + Android via managed workflow |
 | Server | Node.js + ws | Minimal WebSocket relay |
 | Validation | Zod | Schema validation for all messages |
 | Key Storage | expo-secure-store | Hardware-backed secure enclave |
 | Language | TypeScript (strict) | Type safety everywhere |
 | Monorepo | pnpm workspaces | Package management |
-| Testing | Vitest | 57 unit tests for crypto |
+| Testing | Vitest | 120 unit tests for crypto |
 | CI | GitHub Actions | Lint, typecheck, test on every push |
 
 ## Cryptographic Modules
+
+### v1 Core
 
 | Module | Protocol | Description |
 |---|---|---|
@@ -188,6 +219,19 @@ Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Design](docs
 | `envelope.ts` | V1 Envelope | XChaCha20-Poly1305 AEAD with AAD |
 | `kdf.ts` | HKDF-SHA256 | RFC 5869 key derivation |
 
+### v2 Security Hardening
+
+| Module | Protocol | Description |
+|---|---|---|
+| `cipher-suite.ts` | Cipher Suite | Cryptographic agility with immutable suite registry |
+| `hybrid-kem.ts` | Hybrid KEM | Post-quantum X25519 + ML-KEM-768 key encapsulation |
+| `secure-buffer.ts` | SecureBuffer | Misuse-resistant key wrapper with auto-wipe |
+| `protocol-state.ts` | State Machine | Formal session lifecycle with invariant enforcement |
+| `treekem.ts` | TreeKEM | MLS-inspired tree-based group key agreement |
+| `metadata-resistance.ts` | Metadata | Uniform envelopes, cover traffic, message batching |
+| `key-transparency.ts` | Key Transparency | Merkle tree key directory with signed tree heads |
+| `key-splitting.ts` | Key Splitting | Shamir's Secret Sharing over GF(256) |
+
 ## Security Documentation
 
 | Document | Description |
@@ -195,6 +239,7 @@ Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Design](docs
 | [SECURITY_MODEL.md](docs/SECURITY_MODEL.md) | Architecture, protocol flow, key storage, server role |
 | [THREAT_MODEL.md](docs/THREAT_MODEL.md) | What is protected, what isn't, adversary model |
 | [CRYPTO_LIMITS.md](docs/CRYPTO_LIMITS.md) | Full feature status, remaining considerations, test coverage |
+| [SECURITY_ARCHITECTURE_V2.md](docs/SECURITY_ARCHITECTURE_V2.md) | v2 threat model, attack surface review, upgrade plan |
 
 ## License
 

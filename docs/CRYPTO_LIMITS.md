@@ -133,17 +133,113 @@ Multi-layer replay protection:
 **Module:** `packages/crypto/src/replay.ts`
 **Server:** `apps/server/src/index.ts` (`trackMessageId`)
 
+## v2 Security Hardening — IMPLEMENTED
+
+### 11. Cryptographic Agility — IMPLEMENTED
+
+Cipher suite negotiation with immutable registry:
+- **SUITE_CLASSICAL** (0x0001): X25519, Ed25519, XChaCha20-Poly1305, SHA-256 (128-bit security)
+- **SUITE_HYBRID_PQ** (0x0002): X25519 + ML-KEM-768, Ed25519, XChaCha20-Poly1305, SHA-256 (192-bit PQ)
+- `negotiateCipherSuite()` finds best mutually-supported suite
+- `validateSuitePolicy()` enforces minimum security requirements
+- All suites frozen (immutable) to prevent runtime tampering
+
+**Module:** `packages/crypto/src/cipher-suite.ts`
+
+### 12. Post-Quantum Hybrid KEM — IMPLEMENTED
+
+Hybrid key encapsulation combining classical and post-quantum:
+- X25519 (classical ECDH) + ML-KEM-768 (Kyber) hybrid construction
+- Security: if EITHER component is secure, combined secret is secure
+- HKDF combiner with domain separation ("CipherLink-v2-hybrid-kem")
+- Context binding includes ciphertexts + public keys to prevent mix-and-match
+- PQ component uses Kyber wire format (1184B pubkey, 1088B ciphertext) — ready for native drop-in
+
+**Module:** `packages/crypto/src/hybrid-kem.ts`
+**Reference:** NIST SP 800-227, draft-ietf-tls-hybrid-design
+
+### 13. SecureBuffer — IMPLEMENTED
+
+Misuse-resistant wrapper for sensitive cryptographic material:
+- `expose()` / `wipe()` / `equals()` / `clone()` API
+- `UseAfterWipeError` thrown on access after wipe
+- `scope()` / `scopeAsync()` for auto-cleanup (RAII pattern)
+- `fromAndWipeSource()` zeroes input array after copying
+- JSON serialization and toString prevented
+- Custom inspect prevents console.log key leakage
+
+**Module:** `packages/crypto/src/secure-buffer.ts`
+
+### 14. Protocol State Machine — IMPLEMENTED
+
+Formal session lifecycle with invariant enforcement:
+- States: UNINITIALIZED → PREKEY_PUBLISHED → KEY_AGREEMENT → RATCHETING → CLOSED
+- `InvalidTransitionError` on illegal transitions
+- Immutable state objects (frozen after creation)
+- Invariant checks: epoch monotonicity, non-negative counters, timestamp ordering
+- `shouldRotateKeys()` detects when rotation needed (by count or time)
+
+**Module:** `packages/crypto/src/protocol-state.ts`
+
+### 15. TreeKEM Group Protocol — IMPLEMENTED
+
+MLS-inspired tree-based group key agreement:
+- Binary tree with O(log n) update complexity
+- Per-epoch group secrets derived via BLAKE2b with domain separation
+- Node encryption using ephemeral X25519 DH + XChaCha20-Poly1305
+- Ed25519 signed updates for authentication
+- `TreeKEMSession` manages tree state, updates, and message encryption
+
+**Module:** `packages/crypto/src/treekem.ts`
+**Reference:** MLS RFC 9420
+
+### 16. Metadata Resistance — IMPLEMENTED
+
+Traffic analysis countermeasures:
+- **Uniform envelopes**: All messages padded to exactly 4096 bytes
+- **Cover traffic**: Configurable levels (OFF/LOW/MEDIUM/HIGH constant-rate)
+- **Message batching**: Fixed-size batches padded with cover messages, shuffled
+- **Timing jitter**: Random delay decorrelation
+- Envelope types: REAL, COVER, ACK, HEARTBEAT (indistinguishable from outside)
+
+**Module:** `packages/crypto/src/metadata-resistance.ts`
+
+### 17. Key Transparency — IMPLEMENTED
+
+Merkle tree-based verifiable key directory:
+- Insert/update/lookup with version rollback prevention
+- Domain-separated leaf/node hashing (second-preimage resistant)
+- `generateProof()` / `verifyMerkleProof()` for client-side verification
+- `signTreeHead()` / `verifySignedTreeHead()` for server commitment
+- `auditKeyEntry()` end-to-end key audit
+
+**Module:** `packages/crypto/src/key-transparency.ts`
+
+### 18. Key Splitting (Shamir's Secret Sharing) — IMPLEMENTED
+
+Threshold key splitting for backup recovery:
+- GF(256) arithmetic (AES polynomial 0x11B)
+- `splitSecret(secret, N, K)` — K-of-N threshold scheme
+- `reconstructSecret(shares)` — Lagrange interpolation at x=0
+- `splitBackupKey()` — convenience 2-of-3 split (device, server, recovery)
+- Crockford base32 recovery codes for human transcription
+
+**Module:** `packages/crypto/src/key-splitting.ts`
+
 ## Remaining Considerations
 
 ### Not Yet Implemented
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Multi-device (Sesame/MLS) | NOT IMPLEMENTED | Single keypair per device; X3DH prekeys enable asynchronous setup |
+| Multi-device (Sesame/MLS) | NOT IMPLEMENTED | Single keypair per device; TreeKEM provides group foundation |
 | Header encryption | NOT IMPLEMENTED | Message headers are visible; optional enhancement |
-| Private contact discovery | NOT IMPLEMENTED | Server-side PSI not implemented |
+| Private contact discovery | NOT IMPLEMENTED | Server-side PSI not implemented; design in v2 architecture doc |
 | Message deletion / expiry | NOT IMPLEMENTED | No remote wipe or disappearing messages |
 | TLS (wss://) | CONFIG ONLY | Must be configured at deployment; dev uses ws:// |
+| Native ML-KEM-768 | PLACEHOLDER | Hybrid KEM uses Kyber wire format; awaiting native library |
+| Deniable authentication | DESIGNED | Documented in v2 architecture; not yet coded |
+| Anonymous credentials | DESIGNED | Documented in v2 architecture; not yet coded |
 
 ### Production Hardening Recommendations
 
@@ -156,10 +252,13 @@ Multi-layer replay protection:
 7. **Header encryption** for additional metadata protection
 8. **Bug bounty program** for ongoing vulnerability discovery
 9. **Compliance review** (GDPR, etc.)
+10. **Native ML-KEM-768** — replace PQ placeholder when libsodium/liboqs adds Kyber
 
 ## Test Coverage
 
-57 unit tests covering all cryptographic modules:
+120 unit tests covering all cryptographic modules:
+
+### v1 Core (57 tests)
 - Core primitives: 20 tests (keys, KDF, HKDF, AEAD, base64, AAD)
 - Message padding: 6 tests
 - Replay protection: 5 tests
@@ -169,6 +268,16 @@ Multi-layer replay protection:
 - Double Ratchet: 5 tests
 - Sealed sender: 3 tests
 - Group messaging (Sender Keys): 3 tests
+
+### v2 Security Hardening (63 tests)
+- Cipher suite: 9 tests (lookup, negotiation, policy, immutability)
+- SecureBuffer: 10 tests (lifecycle, wipe, scope, serialization safety)
+- Hybrid KEM: 5 tests (keygen, round-trip, uniqueness, wrong-key rejection)
+- Protocol state machine: 8 tests (transitions, invariants, rotation)
+- Metadata resistance: 7 tests (uniform size, round-trip, cover traffic, indistinguishability)
+- Key transparency: 6 tests (insert, proof verification, rollback, audit)
+- Key splitting: 7 tests (split/reconstruct, recovery codes, threshold validation)
+- Adversarial & edge cases: 11 tests (use-after-wipe, state bypass, empty payloads)
 
 ## References
 
