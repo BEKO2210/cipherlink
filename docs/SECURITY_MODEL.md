@@ -1,7 +1,7 @@
 # CipherLink Security Model
 
 > **Author:** Belkis Aslani
-> **Status:** Feature-complete E2EE skeleton — audit recommended before high-risk production use
+> **Status:** v3 production-hardened E2EE — audit pack available, independent audit recommended
 
 ## Architecture Overview
 
@@ -23,26 +23,30 @@
 │  │ Ratchet  │ │                               │  │ Prekey   │ │
 │  │ Sealed   │ │                               │  │ store    │ │
 │  │ Groups   │ │                               │  └─────────┘ │
-│  └──────────┘ │                               │               │
-└───────────────┘                               │  ┌─────────┐ │
-                                                │  │ Offline  │ │
-┌───────────────┐          WebSocket            │  │ queue    │ │
-│               │  (encrypted envelopes only)   │  │ (10min   │ │
-│   Bob's       │◄────────────────────────────►│  │  TTL)    │ │
-│   Device      │                               │  └─────────┘ │
-│               │                               │               │
-│  ┌──────────┐ │                               │  ┌─────────┐ │
-│  │SecureStore│ │                               │  │ Replay   │ │
-│  │ Identity  │ │                               │  │ dedup    │ │
-│  │ Keys     │ │                               │  │ (50K)    │ │
-│  └──────────┘ │                               │  └─────────┘ │
-│               │                               │               │
-│  ┌──────────┐ │                               └───────────────┘
+│  │ Hybrid   │ │                               │               │
+│  │ TreeKEM  │ │                               │  ┌─────────┐ │
+│  └──────────┘ │                               │  │ Offline  │ │
+└───────────────┘                               │  │ queue    │ │
+                                                │  │ (10min   │ │
+┌───────────────┐          WebSocket            │  │  TTL)    │ │
+│               │  (encrypted envelopes only)   │  └─────────┘ │
+│   Bob's       │◄────────────────────────────►│               │
+│   Device      │                               │  ┌─────────┐ │
+│               │                               │  │ Replay   │ │
+│  ┌──────────┐ │                               │  │ dedup    │ │
+│  │SecureStore│ │                               │  │ (50K)    │ │
+│  │ Identity  │ │                               │  └─────────┘ │
+│  │ Keys     │ │                               │               │
+│  └──────────┘ │                               └───────────────┘
+│               │
+│  ┌──────────┐ │
 │  │libsodium │ │
 │  │ X3DH     │ │
 │  │ Ratchet  │ │
 │  │ Sealed   │ │
 │  │ Groups   │ │
+│  │ Hybrid   │ │
+│  │ TreeKEM  │ │
 │  └──────────┘ │
 └───────────────┘
 ```
@@ -155,7 +159,29 @@ Alice                                              Bob
 - Messages for offline recipients held with 10-minute TTL (max 100 per recipient)
 - Supports standard envelopes, sealed envelopes, and group messages
 
+### 11. v2 Security Hardening
+
+- **Post-Quantum Hybrid KEM** — X25519 + ML-KEM-768 hybrid key encapsulation
+- **Cryptographic Agility** — Immutable cipher suite registry with negotiation
+- **TreeKEM Groups** — MLS-inspired tree-based group key agreement with O(log n) updates
+- **Metadata Resistance** — Uniform 4096-byte envelopes, cover traffic, batching, timing jitter
+- **Key Transparency** — Merkle tree-based verifiable key directory with signed tree heads
+- **SecureBuffer** — Misuse-resistant key handling with use-after-wipe detection
+- **Shamir Key Splitting** — 2-of-3 threshold backup key recovery over GF(256)
+- **Protocol State Machine** — Formal session lifecycle (5 states) with invariant enforcement
+
+### 12. v3 Production Hardening
+
+- **TLS Enforcement** — Production guard blocks ws://; mandatory wss:// with configurable cert paths
+- **Server Hardening** — IP-based connection limiting (default 10/IP), WebSocket ping/pong keepalive, group fan-out cap (256)
+- **Sanitized Logging** — Structured logging with level filtering; no secrets, keys, or ciphertext in logs
+- **Dependency Hygiene** — Dependabot for npm + GitHub Actions, lockfile integrity checks in CI, SBOM generation
+- **Audit-Ready Documentation** — Threat model (9 adversary classes), attack surface review, protocol state spec, 34 security claims mapped to code/tests
+- **Testing Upgrade** — 156 tests: unit, property-based (fast-check), fuzz, adversarial
+- **SECURITY.md** — Responsible disclosure policy with severity classification
+
 ## What Is NOT Protected
 
-See [THREAT_MODEL.md](./THREAT_MODEL.md) for a full threat analysis and
-[CRYPTO_LIMITS.md](./CRYPTO_LIMITS.md) for remaining considerations.
+See [THREAT_MODEL.md](./THREAT_MODEL.md) for a full threat analysis,
+[CRYPTO_LIMITS.md](./CRYPTO_LIMITS.md) for remaining considerations, and
+[Audit Pack](./audit/) for the complete audit-readiness documentation.

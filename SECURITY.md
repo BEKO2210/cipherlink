@@ -39,23 +39,25 @@ Instead, report it responsibly:
 
 ## Security Architecture
 
-CipherLink implements Signal Protocol-based E2EE. For full details, see:
+CipherLink implements Signal Protocol-based E2EE with v3 production hardening. For full details, see:
 
 - [Security Model](docs/SECURITY_MODEL.md) — architecture, protocol flow, key storage
 - [Threat Model](docs/THREAT_MODEL.md) — adversary model, what is/isn't protected
 - [Crypto Design](docs/CRYPTO_LIMITS.md) — full feature status, cryptographic primitives
+- [v2 Architecture](docs/SECURITY_ARCHITECTURE_V2.md) — v2 threat model, attack surface, upgrade plan
 - [Audit Pack](docs/audit/) — threat model, attack surface review, security claims mapping
 
 ## Current Limitations
 
-This project is an advanced prototype, not a production-hardened system. Known limitations:
+This project is a v3 production-hardened prototype. An independent security audit is recommended before high-risk production use. Known limitations:
 
-- PQ KEM uses a placeholder (X25519 in Kyber wire format) — not real post-quantum security
+- PQ KEM uses a placeholder (X25519 in Kyber wire format) — not real post-quantum security until native ML-KEM-768 is available
 - Server authentication is public-key claim only — no challenge-response proof
-- No TLS enforcement in the relay server — must be configured at deployment
-- No server-side tests exist
-- TreeKEM group protocol has no integration tests
+- TLS is enforced in production mode (`wss://`); `ws://` is permitted only in `NODE_ENV=development`
+- No server-side integration tests exist
+- Multi-device support is designed but not yet implemented ([design doc](docs/design/MULTI_DEVICE.md))
 - Cover traffic scheduler is standalone — not integrated into the transport layer
+- Deniable authentication is designed but not yet coded
 
 See [FEATURE_STATUS.md](docs/audit/FEATURE_STATUS.md) for the complete feature status table.
 
