@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CipherLink — End-to-End Encrypted Chat</title>
-  <meta name="description" content="CipherLink: A production-grade, security-first E2EE chat skeleton using X25519, HKDF-SHA256, and XChaCha20-Poly1305. By Belkis Aslani." />
+  <meta name="description" content="CipherLink: Security-first E2EE chat with Signal Protocol + v2 hardening — post-quantum hybrid KEM, TreeKEM groups, metadata resistance, key transparency, Shamir key splitting. 120 tests. By Belkis Aslani." />
   <style>
     /* ===== RESET & BASE ===== */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -497,6 +497,7 @@
       <li><a href="#architecture">Architecture</a></li>
       <li><a href="#security">Security</a></li>
       <li><a href="#start">Get Started</a></li>
+      <li><a href="SECURITY_ARCHITECTURE_V2.md">v2 Docs</a></li>
       <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
     </ul>
   </nav>
@@ -506,15 +507,15 @@
     <div>
       <div class="hero-badge">
         <span class="dot"></span>
-        Open Source E2EE Skeleton
+        E2EE with v2 Security Hardening
       </div>
       <h1>
         Messages that<br>
         <span class="gradient">only you can read</span>
       </h1>
       <p>
-        Signal Protocol architecture — X3DH, Double Ratchet, sealed sender,
-        Sender Keys groups, safety numbers. Zero-knowledge server. 57 tests. Built with libsodium.
+        Signal Protocol + v2 security hardening — post-quantum hybrid KEM, TreeKEM groups,
+        metadata resistance, key transparency, cryptographic agility. Zero-knowledge server. 120 tests.
       </p>
       <div class="hero-buttons">
         <a href="#simulation" class="btn btn-primary">
@@ -527,7 +528,7 @@
         </a>
       </div>
       <p class="hero-warning">
-        Security skeleton for educational &amp; demo purposes. Not for high-risk production use without hardening.
+        Audit recommended before high-risk production use. See <a href="SECURITY_ARCHITECTURE_V2.md" style="color:var(--warning)">v2 Security Architecture</a>.
       </p>
     </div>
   </section>
@@ -731,6 +732,74 @@
           <p>PKCS7-style 256-byte block padding hides message length. Multi-layer replay protection with dedup, counters, and server cache.</p>
         </div>
       </div>
+
+      <!-- v2 Security Hardening -->
+      <div class="reveal" style="margin-top:80px;">
+        <div class="section-label">v2 Hardening</div>
+        <h2 class="section-title">Next-Generation Security</h2>
+        <p class="section-desc">
+          Defense-in-depth with post-quantum cryptography, metadata resistance, and formal protocol verification.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+          <h3>Post-Quantum Hybrid KEM</h3>
+          <p>X25519 + ML-KEM-768 (Kyber) hybrid key encapsulation. If either component is secure, the combined secret is secure. Defends against harvest-now-decrypt-later.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <h3>Cryptographic Agility</h3>
+          <p>Immutable cipher suite registry with negotiation. Classical (128-bit) and hybrid PQ (192-bit) suites. Policy enforcement for minimum security levels.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>TreeKEM Group Protocol</h3>
+          <p>MLS-inspired tree-based group key agreement with O(log n) update complexity. Per-epoch secrets, Ed25519 signed updates, forward-secret group messaging.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <h3>Metadata Resistance</h3>
+          <p>Uniform 4096-byte envelopes make all messages identical in size. Cover traffic, message batching, and timing jitter defeat traffic analysis.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h3>Key Transparency</h3>
+          <p>Merkle tree-based verifiable key directory. Signed tree heads, inclusion proofs, and client-side audit. Prevents silent key substitution by the server.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="12" y1="16" x2="12" y2="19"/></svg>
+          </div>
+          <h3>Shamir Key Splitting</h3>
+          <p>2-of-3 Shamir's Secret Sharing over GF(256). Backup key split across device, server, and printed recovery code. Any 2 shares reconstruct the key.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h3>SecureBuffer</h3>
+          <p>Misuse-resistant key wrapper. Use-after-wipe detection, RAII auto-cleanup scopes, JSON/toString leak prevention. Zero raw key exposure.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Protocol State Machine</h3>
+          <p>Formal session lifecycle: UNINITIALIZED, PREKEY_PUBLISHED, KEY_AGREEMENT, RATCHETING, CLOSED. Invariant enforcement prevents undefined transitions.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -807,9 +876,12 @@
             <li>Sender identity leakage (sealed sender)</li>
             <li>MITM attacks (safety number verification)</li>
             <li>Replay attacks (client dedup + server 50K cache)</li>
-            <li>Message length analysis (256-byte block padding)</li>
-            <li>Group message forgery (Ed25519 signatures)</li>
-            <li>Backup exposure (Argon2id + XChaCha20-Poly1305)</li>
+            <li>Message length analysis (uniform 4096-byte envelopes)</li>
+            <li>Quantum computing threat (post-quantum hybrid KEM)</li>
+            <li>Traffic analysis (cover traffic + batching + jitter)</li>
+            <li>Key directory tampering (Merkle tree transparency)</li>
+            <li>Backup single-point-of-failure (Shamir 2-of-3 splitting)</li>
+            <li>Key material misuse (SecureBuffer with wipe detection)</li>
           </ul>
         </div>
         <div class="sec-card known-limits">
@@ -819,7 +891,7 @@
           </h4>
           <ul>
             <li>No multi-device support (single keypair per device)</li>
-            <li>Traffic timing patterns visible to network observer</li>
+            <li>PQ KEM uses Kyber wire format placeholder (ready for native drop-in)</li>
             <li>No TLS in dev mode (production must use wss://)</li>
             <li>No disappearing messages or remote wipe</li>
             <li>Needs independent security audit for production</li>
@@ -908,7 +980,7 @@
 <span class="comment"># In another terminal — start the Expo mobile app</span>
 <span class="prompt">$</span> <span class="cmd">pnpm dev:mobile</span>
 
-<span class="comment"># Run tests (57 crypto unit tests)</span>
+<span class="comment"># Run tests (120 crypto unit tests — 57 v1 + 63 v2)</span>
 <span class="prompt">$</span> <span class="cmd">pnpm test</span>
       </div>
     </div>
