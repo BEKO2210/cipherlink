@@ -75,7 +75,7 @@ jobs:
           pnpm -r list --depth 0 >> sbom.txt
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sbom
           path: sbom.txt
