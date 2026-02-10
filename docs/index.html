@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CipherLink — End-to-End Encrypted Chat</title>
-  <meta name="description" content="CipherLink: Security-first E2EE chat with Signal Protocol + v2 hardening — post-quantum hybrid KEM, TreeKEM groups, metadata resistance, key transparency, Shamir key splitting. 120 tests. By Belkis Aslani." />
+  <meta name="description" content="CipherLink: Security-first E2EE chat with Signal Protocol + v2/v3 hardening — post-quantum hybrid KEM, TreeKEM groups, metadata resistance, key transparency, Shamir key splitting, TLS enforcement, audit-ready. 156 tests. By Belkis Aslani." />
   <style>
     /* ===== RESET & BASE ===== */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -498,6 +498,7 @@
       <li><a href="#security">Security</a></li>
       <li><a href="#start">Get Started</a></li>
       <li><a href="SECURITY_ARCHITECTURE_V2.md">v2 Docs</a></li>
+      <li><a href="audit/">Audit Pack</a></li>
       <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
     </ul>
   </nav>
@@ -507,15 +508,16 @@
     <div>
       <div class="hero-badge">
         <span class="dot"></span>
-        E2EE with v2 Security Hardening
+        E2EE with v3 Production Hardening
       </div>
       <h1>
         Messages that<br>
         <span class="gradient">only you can read</span>
       </h1>
       <p>
-        Signal Protocol + v2 security hardening — post-quantum hybrid KEM, TreeKEM groups,
-        metadata resistance, key transparency, cryptographic agility. Zero-knowledge server. 120 tests.
+        Signal Protocol + v3 production hardening — post-quantum hybrid KEM, TreeKEM groups,
+        metadata resistance, key transparency, TLS enforcement, audit-ready security documentation.
+        Zero-knowledge server. 156 tests (unit, property-based, fuzz, adversarial).
       </p>
       <div class="hero-buttons">
         <a href="#simulation" class="btn btn-primary">
@@ -528,7 +530,7 @@
         </a>
       </div>
       <p class="hero-warning">
-        Audit recommended before high-risk production use. See <a href="SECURITY_ARCHITECTURE_V2.md" style="color:var(--warning)">v2 Security Architecture</a>.
+        Audit recommended before high-risk production use. See <a href="audit/" style="color:var(--warning)">Audit Pack</a> &amp; <a href="SECURITY_ARCHITECTURE_V2.md" style="color:var(--warning)">Security Architecture</a>.
       </p>
     </div>
   </section>
@@ -800,6 +802,60 @@
           <p>Formal session lifecycle: UNINITIALIZED, PREKEY_PUBLISHED, KEY_AGREEMENT, RATCHETING, CLOSED. Invariant enforcement prevents undefined transitions.</p>
         </div>
       </div>
+
+      <!-- v3 Production Hardening -->
+      <div class="reveal" style="margin-top:80px;">
+        <div class="section-label">v3 Production Hardening</div>
+        <h2 class="section-title">Audit-Ready Infrastructure</h2>
+        <p class="section-desc">
+          Server hardening, dependency hygiene, comprehensive testing, and security documentation for production readiness.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>TLS Enforcement</h3>
+          <p>Production guard blocks ws:// connections. Mandatory wss:// with configurable cert/key paths. Explicit opt-in required for insecure transport.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Server Hardening</h3>
+          <p>IP-based connection limiting, WebSocket ping/pong keepalive, structured logging with level filtering, group fan-out cap (256), sanitized log output.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <h3>156 Tests</h3>
+          <p>Unit, property-based (fast-check), fuzz, and adversarial tests. Protocol state invariants, AEAD corruption, replay detection, key mismatch, envelope manipulation.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3>Audit-Ready Docs</h3>
+          <p>Threat model (9 adversary classes), attack surface review, protocol state spec, 34 security claims mapped to code/tests, SECURITY.md disclosure policy.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </div>
+          <h3>Dependency Hygiene</h3>
+          <p>Dependabot for npm + GitHub Actions. Lockfile integrity checks in CI. SBOM generation with 90-day artifact retention.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M9 6h6"/></svg>
+          </div>
+          <h3>Multi-Device Design</h3>
+          <p>Complete design doc: per-device keypairs, QR/passphrase linking, device revocation, key transparency integration, 5-phase rollout plan.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -882,6 +938,10 @@
             <li>Key directory tampering (Merkle tree transparency)</li>
             <li>Backup single-point-of-failure (Shamir 2-of-3 splitting)</li>
             <li>Key material misuse (SecureBuffer with wipe detection)</li>
+            <li>Insecure transport (TLS enforcement in production)</li>
+            <li>Connection flooding (IP-based rate limiting)</li>
+            <li>Log data leaks (sanitized structured logging)</li>
+            <li>Dependency supply chain (Dependabot + lockfile integrity)</li>
           </ul>
         </div>
         <div class="sec-card known-limits">
@@ -890,10 +950,10 @@
             Remaining Considerations
           </h4>
           <ul>
-            <li>No multi-device support (single keypair per device)</li>
+            <li>No multi-device support yet (design doc complete, implementation pending)</li>
             <li>PQ KEM uses Kyber wire format placeholder (ready for native drop-in)</li>
-            <li>No TLS in dev mode (production must use wss://)</li>
             <li>No disappearing messages or remote wipe</li>
+            <li>No server integration tests yet</li>
             <li>Needs independent security audit for production</li>
           </ul>
         </div>
@@ -943,6 +1003,10 @@
           <div class="role">Testing</div>
         </div>
         <div class="stack-item">
+          <div class="name">fast-check</div>
+          <div class="role">Property Testing</div>
+        </div>
+        <div class="stack-item">
           <div class="name">GitHub Actions</div>
           <div class="role">CI/CD</div>
         </div>
@@ -980,7 +1044,7 @@
 <span class="comment"># In another terminal — start the Expo mobile app</span>
 <span class="prompt">$</span> <span class="cmd">pnpm dev:mobile</span>
 
-<span class="comment"># Run tests (120 crypto unit tests — 57 v1 + 63 v2)</span>
+<span class="comment"># Run all 156 tests (57 v1 + 63 v2 + 36 v3 hardening)</span>
 <span class="prompt">$</span> <span class="cmd">pnpm test</span>
       </div>
     </div>
@@ -994,7 +1058,7 @@
       by <span class="author">Belkis Aslani</span>
     </p>
     <p style="margin-top:8px;font-size:.75rem;color:var(--text-dim);">
-      MIT License &mdash; Not for high-risk production use without hardening.
+      MIT License &mdash; Audit recommended before high-risk production use.
     </p>
   </footer>
 
