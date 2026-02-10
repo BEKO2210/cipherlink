@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/assets/logo-512.png" alt="CipherLink Logo" width="180" />
+
 # CipherLink
 
 **End-to-end encrypted chat app with Signal Protocol architecture**

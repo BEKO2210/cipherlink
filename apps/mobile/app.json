@@ -5,6 +5,7 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "cipherlink",
+    "icon": "./assets/icon.png",
     "platforms": ["ios", "android"],
     "newArchEnabled": true,
     "ios": {
@@ -14,8 +15,14 @@
     "android": {
       "package": "com.cipherlink.app",
       "adaptiveIcon": {
-        "backgroundColor": "#1a1a2e"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0a1a"
       }
+    },
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0a1a"
     }
   }
 }
