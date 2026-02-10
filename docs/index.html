@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CipherLink — End-to-End Encrypted Chat</title>
+  <meta name="description" content="CipherLink: A production-grade, security-first E2EE chat skeleton using X25519, HKDF-SHA256, and XChaCha20-Poly1305. By Belkis Aslani." />
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #0a0a1a;
+      --bg-secondary: #111127;
+      --bg-card: #16163a;
+      --accent: #e94560;
+      --accent-glow: rgba(233, 69, 96, 0.35);
+      --accent2: #0f3460;
+      --accent2-light: #1a5276;
+      --text: #eaeaea;
+      --text-muted: #8888aa;
+      --text-dim: #555577;
+      --success: #4caf50;
+      --warning: #f5a623;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-primary);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+    a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
+    a:hover { opacity: .8; }
+
+    /* ===== ANIMATED BACKGROUND GRID ===== */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(233,69,96,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,69,96,.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridShift 20s linear infinite;
+    }
+    @keyframes gridShift {
+      0% { background-position: 0 0; }
+      100% { background-position: 60px 60px; }
+    }
+
+    /* ===== FLOATING PARTICLES ===== */
+    .particles {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 4px; height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0;
+      animation: particleFloat linear infinite;
+    }
+    @keyframes particleFloat {
+      0%   { opacity: 0; transform: translateY(100vh) scale(0); }
+      10%  { opacity: .6; }
+      90%  { opacity: .6; }
+      100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+    }
+
+    /* ===== NAV ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px;
+      background: rgba(10,10,26,.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(233,69,96,.1);
+      transition: box-shadow .3s;
+    }
+    nav.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,.5); }
+    .nav-logo {
+      font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a {
+      color: var(--text-muted); font-size: .9rem; font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); opacity: 1; }
+
+    /* ===== SECTIONS ===== */
+    section { position: relative; z-index: 1; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 24px 80px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(233,69,96,.1); border: 1px solid rgba(233,69,96,.2);
+      border-radius: 50px; padding: 6px 18px; font-size: .8rem;
+      color: var(--accent); margin-bottom: 24px;
+      animation: fadeUp .8s ease-out both;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-glow); }
+      50% { opacity: .7; box-shadow: 0 0 0 8px transparent; }
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 900; letter-spacing: -2px;
+      line-height: 1.1; margin-bottom: 20px;
+      animation: fadeUp .8s ease-out .1s both;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--accent) 0%, #ff6b8a 50%, #c23152 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-muted); max-width: 600px; margin: 0 auto 36px;
+      animation: fadeUp .8s ease-out .2s both;
+    }
+    .hero-buttons {
+      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+      animation: fadeUp .8s ease-out .3s both;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 12px;
+      font-size: .95rem; font-weight: 600;
+      border: none; cursor: pointer; transition: all .25s;
+    }
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      box-shadow: 0 4px 25px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 35px var(--accent-glow);
+      color: #fff;
+    }
+    .btn-outline {
+      background: transparent; color: var(--text);
+      border: 1px solid rgba(255,255,255,.15);
+    }
+    .btn-outline:hover {
+      border-color: var(--accent); color: var(--accent);
+      transform: translateY(-2px);
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero-warning {
+      margin-top: 28px; font-size: .75rem; color: var(--warning);
+      animation: fadeUp .8s ease-out .4s both;
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 3px; color: var(--accent); margin-bottom: 12px;
+    }
+    .section-label::before {
+      content: ''; width: 24px; height: 2px; background: var(--accent);
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800; letter-spacing: -1px;
+      margin-bottom: 16px; line-height: 1.2;
+    }
+    .section-desc {
+      color: var(--text-muted); font-size: 1.05rem;
+      max-width: 600px; margin-bottom: 48px;
+    }
+
+    /* ===== E2EE SIMULATION ===== */
+    .sim-section { padding: 100px 0; }
+    .sim-wrapper {
+      position: relative;
+      background: var(--bg-secondary);
+      border: 1px solid rgba(233,69,96,.1);
+      border-radius: var(--radius);
+      padding: 48px 32px;
+      overflow: hidden;
+    }
+    .sim-wrapper::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+    .sim-stages {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .sim-stage {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 24px;
+      padding: 28px 0;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all .6s ease-out;
+    }
+    .sim-stage.visible {
+      opacity: 1; transform: translateY(0);
+    }
+    .sim-stage:last-child { border-bottom: none; }
+    .sim-device {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      font-family: var(--mono);
+      font-size: .8rem;
+      min-height: 70px;
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .sim-device::after {
+      content: ''; position: absolute; inset: 0;
+      border-radius: var(--radius-sm);
+      opacity: 0;
+      transition: opacity .4s;
+    }
+    .sim-device.active::after {
+      opacity: 1;
+      background: linear-gradient(135deg, rgba(233,69,96,.08), transparent);
+    }
+    .sim-device .label {
+      font-family: var(--font);
+      font-size: .7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: var(--accent); margin-bottom: 6px;
+    }
+    .sim-device .content {
+      color: var(--text); word-break: break-all; position: relative; z-index: 1;
+    }
+    .sim-device .content.cipher { color: var(--text-dim); }
+    .sim-device .content.success { color: var(--success); }
+    .sim-arrow {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; color: var(--text-muted); font-size: .7rem; min-width: 80px;
+    }
+    .sim-arrow svg { color: var(--accent); }
+    .sim-step-label {
+      font-size: .65rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-dim); text-align: center;
+    }
+    .typing-cursor {
+      display: inline-block; width: 2px; height: 1em;
+      background: var(--accent); margin-left: 2px;
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; } 50% { opacity: 0; }
+    }
+
+    /* ===== FEATURE CARDS ===== */
+    .features-section { padding: 100px 0; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: all .3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: var(--accent); transform: scaleX(0);
+      transform-origin: left; transition: transform .4s;
+    }
+    .feature-card:hover::before { transform: scaleX(1); }
+    .feature-card:hover {
+      border-color: rgba(233,69,96,.2);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,.3);
+    }
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: rgba(233,69,96,.1);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px; font-size: 1.4rem;
+    }
+    .feature-card h3 {
+      font-size: 1.15rem; font-weight: 700; margin-bottom: 10px;
+    }
+    .feature-card p {
+      color: var(--text-muted); font-size: .9rem; line-height: 1.6;
+    }
+
+    /* ===== TECH STACK ===== */
+    .stack-section { padding: 100px 0; }
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .stack-item {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      text-align: center;
+      transition: all .3s;
+    }
+    .stack-item:hover {
+      border-color: rgba(233,69,96,.2);
+      transform: translateY(-2px);
+    }
+    .stack-item .name {
+      font-weight: 700; font-size: .95rem; margin-bottom: 4px;
+    }
+    .stack-item .role {
+      font-size: .75rem; color: var(--text-muted);
+    }
+
+    /* ===== ARCHITECTURE ===== */
+    .arch-section { padding: 100px 0; }
+    .arch-diagram {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      padding: 48px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .arch-node {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius-sm);
+      padding: 24px 28px;
+      text-align: center;
+      min-width: 180px;
+      transition: all .3s;
+      position: relative;
+    }
+    .arch-node:hover { border-color: var(--accent); transform: scale(1.03); }
+    .arch-node .icon { font-size: 2rem; margin-bottom: 10px; }
+    .arch-node .title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+    .arch-node .desc { font-size: .75rem; color: var(--text-muted); }
+    .arch-connector {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      color: var(--text-dim); font-size: .7rem; padding: 0 8px;
+    }
+    .arch-connector .line {
+      width: 60px; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2-light));
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .arch-connector .line::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, #fff, transparent);
+      animation: dataFlow 2s linear infinite;
+    }
+    @keyframes dataFlow {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ===== SECURITY OVERVIEW ===== */
+    .security-section { padding: 100px 0; }
+    .security-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+    .sec-card {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+    }
+    .sec-card h4 {
+      font-size: .9rem; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sec-card ul {
+      list-style: none; display: flex; flex-direction: column; gap: 8px;
+    }
+    .sec-card li {
+      font-size: .85rem; color: var(--text-muted);
+      padding-left: 20px; position: relative;
+    }
+    .sec-card li::before {
+      content: ''; position: absolute; left: 0; top: 8px;
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .sec-card.protected li::before { background: var(--success); }
+    .sec-card.known-limits li::before { background: var(--warning); }
+
+    /* ===== GETTING STARTED ===== */
+    .start-section { padding: 100px 0; }
+    .code-block {
+      background: #0d0d22;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius-sm);
+      padding: 24px 28px;
+      font-family: var(--mono);
+      font-size: .85rem;
+      line-height: 2;
+      color: var(--text-muted);
+      overflow-x: auto;
+      position: relative;
+    }
+    .code-block .prompt { color: var(--accent); }
+    .code-block .comment { color: var(--text-dim); }
+    .code-block .cmd { color: var(--text); }
+    .code-block .copy-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      color: var(--text-muted); border-radius: 6px;
+      padding: 4px 12px; font-size: .7rem; cursor: pointer;
+      transition: all .2s;
+    }
+    .code-block .copy-btn:hover {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid rgba(255,255,255,.05);
+      padding: 48px 24px;
+      text-align: center;
+    }
+    footer p { color: var(--text-dim); font-size: .85rem; }
+    footer .author { color: var(--accent); font-weight: 600; }
+
+    /* ===== SCROLL REVEAL ===== */
+    .reveal {
+      opacity: 0; transform: translateY(40px);
+      transition: all .7s ease-out;
+    }
+    .reveal.visible {
+      opacity: 1; transform: translateY(0);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      nav { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .sim-stage { grid-template-columns: 1fr; gap: 12px; }
+      .sim-arrow { flex-direction: row; min-width: auto; }
+      .sim-arrow svg { transform: rotate(90deg); }
+      .security-grid { grid-template-columns: 1fr; }
+      .arch-diagram { flex-direction: column; }
+      .arch-connector .line {
+        width: 2px; height: 40px;
+        background: linear-gradient(180deg, var(--accent), var(--accent2-light));
+      }
+      .container { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background effects -->
+  <div class="bg-grid"></div>
+  <div class="particles" id="particles"></div>
+
+  <!-- Navigation -->
+  <nav id="nav">
+    <div class="nav-logo"><span>Cipher</span>Link</div>
+    <ul class="nav-links">
+      <li><a href="#simulation">Demo</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#security">Security</a></li>
+      <li><a href="#start">Get Started</a></li>
+      <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div>
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Open Source E2EE Skeleton
+      </div>
+      <h1>
+        Messages that<br>
+        <span class="gradient">only you can read</span>
+      </h1>
+      <p>
+        A production-grade, security-first end-to-end encrypted chat skeleton.
+        Zero-knowledge server. Best-practice cryptography. Built with libsodium.
+      </p>
+      <div class="hero-buttons">
+        <a href="#simulation" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          See How It Works
+        </a>
+        <a href="https://github.com/BEKO2210/cipherlink" target="_blank" class="btn btn-outline">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+      <p class="hero-warning">
+        Security skeleton for educational &amp; demo purposes. Not for high-risk production use without hardening.
+      </p>
+    </div>
+  </section>
+
+  <!-- E2EE Simulation -->
+  <section class="sim-section" id="simulation">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Interactive Demo</div>
+        <h2 class="section-title">End-to-End Encryption in Action</h2>
+        <p class="section-desc">
+          Watch how CipherLink encrypts a message from Alice to Bob. The server only ever sees ciphertext.
+        </p>
+      </div>
+
+      <div class="sim-wrapper reveal">
+        <!-- Control -->
+        <div style="text-align:center;margin-bottom:24px;">
+          <button class="btn btn-primary" id="simStart" style="font-family:var(--font);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Run Encryption Demo
+          </button>
+          <button class="btn btn-outline" id="simReset" style="font-family:var(--font);display:none;">
+            Reset Demo
+          </button>
+        </div>
+
+        <div class="sim-stages" id="simStages">
+          <!-- Stage 1: Plaintext -->
+          <div class="sim-stage" data-stage="1">
+            <div class="sim-device" id="alicePlain">
+              <div class="label">Alice's Device</div>
+              <div class="content" id="alicePlainText">Waiting...</div>
+            </div>
+            <div class="sim-arrow">
+              <div class="sim-step-label">Step 1</div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              <div class="sim-step-label">Compose</div>
+            </div>
+            <div class="sim-device">
+              <div class="label">Message</div>
+              <div class="content" id="plainMsg">Waiting for input...</div>
+            </div>
+          </div>
+
+          <!-- Stage 2: Key Exchange -->
+          <div class="sim-stage" data-stage="2">
+            <div class="sim-device" id="aliceKeys">
+              <div class="label">Alice's Keys</div>
+              <div class="content" id="aliceKeyText">-</div>
+            </div>
+            <div class="sim-arrow">
+              <div class="sim-step-label">Step 2</div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              <div class="sim-step-label">X25519 DH</div>
+            </div>
+            <div class="sim-device" id="bobKeys">
+              <div class="label">Shared Secret</div>
+              <div class="content" id="sharedSecretText">-</div>
+            </div>
+          </div>
+
+          <!-- Stage 3: KDF -->
+          <div class="sim-stage" data-stage="3">
+            <div class="sim-device">
+              <div class="label">HKDF-SHA256</div>
+              <div class="content" id="kdfInput">-</div>
+            </div>
+            <div class="sim-arrow">
+              <div class="sim-step-label">Step 3</div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              <div class="sim-step-label">Derive Key</div>
+            </div>
+            <div class="sim-device">
+              <div class="label">Message Key (256-bit)</div>
+              <div class="content" id="msgKeyText">-</div>
+            </div>
+          </div>
+
+          <!-- Stage 4: Encryption -->
+          <div class="sim-stage" data-stage="4">
+            <div class="sim-device">
+              <div class="label">XChaCha20-Poly1305</div>
+              <div class="content" id="encInput">-</div>
+            </div>
+            <div class="sim-arrow">
+              <div class="sim-step-label">Step 4</div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              <div class="sim-step-label">Encrypt</div>
+            </div>
+            <div class="sim-device">
+              <div class="label">Ciphertext + Auth Tag</div>
+              <div class="content cipher" id="cipherText">-</div>
+            </div>
+          </div>
+
+          <!-- Stage 5: Server relay -->
+          <div class="sim-stage" data-stage="5">
+            <div class="sim-device">
+              <div class="label">Relay Server</div>
+              <div class="content cipher" id="serverSees">-</div>
+            </div>
+            <div class="sim-arrow">
+              <div class="sim-step-label">Step 5</div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              <div class="sim-step-label">Forward</div>
+            </div>
+            <div class="sim-device" id="serverNote">
+              <div class="label">Server Knowledge</div>
+              <div class="content" id="serverKnows">-</div>
+            </div>
+          </div>
+
+          <!-- Stage 6: Decryption -->
+          <div class="sim-stage" data-stage="6">
+            <div class="sim-device">
+              <div class="label">Bob's Device</div>
+              <div class="content" id="bobReceived">-</div>
+            </div>
+            <div class="sim-arrow">
+              <div class="sim-step-label">Step 6</div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              <div class="sim-step-label">Decrypt</div>
+            </div>
+            <div class="sim-device">
+              <div class="label">Plaintext Recovered</div>
+              <div class="content success" id="bobPlain">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Capabilities</div>
+        <h2 class="section-title">Built for Security</h2>
+        <p class="section-desc">
+          Every design decision prioritizes cryptographic soundness and zero-trust principles.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>Zero-Knowledge Server</h3>
+          <p>The relay server never sees plaintext. It routes encrypted envelopes by recipient public key and forgets everything.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>AEAD Encryption</h3>
+          <p>XChaCha20-Poly1305 with authenticated associated data binds sender, recipient, timestamp, and protocol version to every message.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          </div>
+          <h3>X25519 Key Exchange</h3>
+          <p>Elliptic-curve Diffie-Hellman on Curve25519. Both parties independently derive the same shared secret without ever transmitting it.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>Secure Key Storage</h3>
+          <p>Private keys are stored in the device's hardware-backed secure enclave via expo-secure-store (iOS Keychain / Android Keystore).</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Rate Limiting</h3>
+          <p>Token-bucket rate limiter per connection prevents flooding and basic DoS. Configurable burst and sustained rates.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3>Comprehensive Docs</h3>
+          <p>Full threat model, security architecture, and cryptographic limitations documented. Honest about what's protected and what isn't.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section class="arch-section" id="architecture">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">System Design</div>
+        <h2 class="section-title">Architecture</h2>
+        <p class="section-desc">
+          A clean separation between client-side encryption and a minimal relay server.
+        </p>
+      </div>
+
+      <div class="arch-diagram reveal">
+        <div class="arch-node">
+          <div class="icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div class="title">Alice's Device</div>
+          <div class="desc">Expo RN + libsodium<br>SecureStore for keys<br>Encrypts before sending</div>
+        </div>
+
+        <div class="arch-connector">
+          <div class="line"></div>
+          <span>Ciphertext<br>only</span>
+        </div>
+
+        <div class="arch-node" style="border-color:rgba(233,69,96,.3);">
+          <div class="icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          </div>
+          <div class="title">Relay Server</div>
+          <div class="desc">Node.js + ws<br>Zero knowledge<br>Route &amp; forget</div>
+        </div>
+
+        <div class="arch-connector">
+          <div class="line"></div>
+          <span>Ciphertext<br>only</span>
+        </div>
+
+        <div class="arch-node">
+          <div class="icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div class="title">Bob's Device</div>
+          <div class="desc">Expo RN + libsodium<br>SecureStore for keys<br>Decrypts on receive</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security -->
+  <section class="security-section" id="security">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Transparency</div>
+        <h2 class="section-title">Security Posture</h2>
+        <p class="section-desc">
+          We document exactly what is protected and what isn't. No false claims of being "unhackable".
+        </p>
+      </div>
+
+      <div class="security-grid reveal">
+        <div class="sec-card protected">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Protected Against
+          </h4>
+          <ul>
+            <li>Server reading message contents</li>
+            <li>Message tampering in transit (AEAD auth tag)</li>
+            <li>Metadata tampering (AAD binding)</li>
+            <li>Sender identity spoofing</li>
+            <li>Brute-force key recovery (256-bit keys)</li>
+            <li>Nonce reuse (24-byte random, XChaCha20)</li>
+          </ul>
+        </div>
+        <div class="sec-card known-limits">
+          <h4>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Known Limitations
+          </h4>
+          <ul>
+            <li>No forward secrecy (static DH keys)</li>
+            <li>No Double Ratchet (same key per pair)</li>
+            <li>Metadata visible to server (who, when, size)</li>
+            <li>No automated key verification (manual only)</li>
+            <li>No group messaging or multi-device</li>
+            <li>No sealed sender (sender visible to server)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section class="stack-section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Technology</div>
+        <h2 class="section-title">Tech Stack</h2>
+      </div>
+
+      <div class="stack-grid reveal">
+        <div class="stack-item">
+          <div class="name">libsodium</div>
+          <div class="role">Cryptography</div>
+        </div>
+        <div class="stack-item">
+          <div class="name">Expo</div>
+          <div class="role">React Native</div>
+        </div>
+        <div class="stack-item">
+          <div class="name">TypeScript</div>
+          <div class="role">Strict Mode</div>
+        </div>
+        <div class="stack-item">
+          <div class="name">Node.js</div>
+          <div class="role">Server Runtime</div>
+        </div>
+        <div class="stack-item">
+          <div class="name">ws</div>
+          <div class="role">WebSocket</div>
+        </div>
+        <div class="stack-item">
+          <div class="name">Zod</div>
+          <div class="role">Validation</div>
+        </div>
+        <div class="stack-item">
+          <div class="name">pnpm</div>
+          <div class="role">Workspace</div>
+        </div>
+        <div class="stack-item">
+          <div class="name">Vitest</div>
+          <div class="role">Testing</div>
+        </div>
+        <div class="stack-item">
+          <div class="name">GitHub Actions</div>
+          <div class="role">CI/CD</div>
+        </div>
+        <div class="stack-item">
+          <div class="name">SecureStore</div>
+          <div class="role">Key Storage</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Getting Started -->
+  <section class="start-section" id="start">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-label">Quick Start</div>
+        <h2 class="section-title">Get Running in 60 Seconds</h2>
+        <p class="section-desc">
+          Clone, install, start. That's it.
+        </p>
+      </div>
+
+      <div class="code-block reveal">
+        <button class="copy-btn" onclick="copyCode()">Copy</button>
+<span class="comment"># Clone the repository</span>
+<span class="prompt">$</span> <span class="cmd">git clone https://github.com/BEKO2210/cipherlink.git</span>
+<span class="prompt">$</span> <span class="cmd">cd cipherlink</span>
+
+<span class="comment"># Install dependencies</span>
+<span class="prompt">$</span> <span class="cmd">pnpm install</span>
+
+<span class="comment"># Start the zero-knowledge relay server</span>
+<span class="prompt">$</span> <span class="cmd">pnpm dev:server</span>
+
+<span class="comment"># In another terminal — start the Expo mobile app</span>
+<span class="prompt">$</span> <span class="cmd">pnpm dev:mobile</span>
+
+<span class="comment"># Run tests (20 crypto unit tests)</span>
+<span class="prompt">$</span> <span class="cmd">pnpm test</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      <span class="author">CipherLink</span> &mdash;
+      End-to-End Encrypted Chat Skeleton &mdash;
+      by <span class="author">Belkis Aslani</span>
+    </p>
+    <p style="margin-top:8px;font-size:.75rem;color:var(--text-dim);">
+      MIT License &mdash; Not for high-risk production use without hardening.
+    </p>
+  </footer>
+
+  <script>
+    /* ===== Particles ===== */
+    (function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (8 + Math.random() * 12) + 's';
+        p.style.animationDelay = Math.random() * 10 + 's';
+        p.style.width = p.style.height = (2 + Math.random() * 4) + 'px';
+        container.appendChild(p);
+      }
+    })();
+
+    /* ===== Scroll nav shadow ===== */
+    window.addEventListener('scroll', () => {
+      document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    /* ===== Scroll reveal ===== */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    /* ===== E2EE Simulation ===== */
+    const MESSAGE = "Hey Bob, let's meet at the park at 3pm!";
+
+    function randomHex(len) {
+      const chars = '0123456789abcdef';
+      let s = '';
+      for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * 16)];
+      return s;
+    }
+
+    function typeText(el, text, speed = 30) {
+      return new Promise(resolve => {
+        el.textContent = '';
+        let i = 0;
+        const cursor = document.createElement('span');
+        cursor.className = 'typing-cursor';
+        el.appendChild(cursor);
+        const iv = setInterval(() => {
+          if (i < text.length) {
+            el.textContent = text.slice(0, i + 1);
+            el.appendChild(cursor);
+            i++;
+          } else {
+            clearInterval(iv);
+            if (cursor.parentNode) cursor.remove();
+            resolve();
+          }
+        }, speed);
+      });
+    }
+
+    function showStage(n) {
+      const stage = document.querySelector(`.sim-stage[data-stage="${n}"]`);
+      if (stage) {
+        stage.classList.add('visible');
+        stage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    async function delay(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    const simBtn = document.getElementById('simStart');
+    const resetBtn = document.getElementById('simReset');
+
+    simBtn.addEventListener('click', runSimulation);
+    resetBtn.addEventListener('click', resetSimulation);
+
+    async function runSimulation() {
+      simBtn.style.display = 'none';
+      resetBtn.style.display = 'inline-flex';
+
+      const alicePub = randomHex(16) + '...';
+      const bobPub = randomHex(16) + '...';
+      const sharedSecret = randomHex(16) + '...';
+      const msgKey = randomHex(16) + '...';
+      const nonce = randomHex(12) + '...';
+      const ciphertext = randomHex(32) + '...';
+
+      // Stage 1 — Plaintext
+      showStage(1);
+      document.getElementById('alicePlain').classList.add('active');
+      await typeText(document.getElementById('alicePlainText'), 'Composing message...');
+      await delay(300);
+      await typeText(document.getElementById('plainMsg'), MESSAGE);
+      await delay(500);
+
+      // Stage 2 — Key Exchange
+      showStage(2);
+      await delay(200);
+      await typeText(document.getElementById('aliceKeyText'), 'Alice: ' + alicePub + '\nBob:   ' + bobPub, 20);
+      await delay(300);
+      await typeText(document.getElementById('sharedSecretText'), sharedSecret, 25);
+      await delay(500);
+
+      // Stage 3 — KDF
+      showStage(3);
+      await delay(200);
+      await typeText(document.getElementById('kdfInput'), 'Input: shared_secret\nSalt: 0x00...00\nInfo: "cipherlink-v1-message-key"', 15);
+      await delay(300);
+      await typeText(document.getElementById('msgKeyText'), msgKey, 25);
+      await delay(500);
+
+      // Stage 4 — Encryption
+      showStage(4);
+      await delay(200);
+      await typeText(document.getElementById('encInput'), 'Key: ' + msgKey + '\nNonce: ' + nonce + '\nAAD: {sender, recipient, ts, id, v1}', 12);
+      await delay(300);
+      await typeText(document.getElementById('cipherText'), ciphertext, 15);
+      await delay(500);
+
+      // Stage 5 — Server
+      showStage(5);
+      await delay(200);
+      await typeText(document.getElementById('serverSees'), '{ v:1, ciphertext:"' + ciphertext.slice(0, 24) + '...", nonce:"' + nonce + '" }', 12);
+      await delay(300);
+      await typeText(document.getElementById('serverKnows'), 'Plaintext? NONE.\nKeys? NONE.\nRole: Route & Forget.', 20);
+      await delay(500);
+
+      // Stage 6 — Decryption
+      showStage(6);
+      await delay(200);
+      await typeText(document.getElementById('bobReceived'), 'Received encrypted envelope.\nDeriving shared secret...\nDecrypting with XChaCha20-Poly1305...', 15);
+      await delay(400);
+      await typeText(document.getElementById('bobPlain'), MESSAGE, 30);
+    }
+
+    function resetSimulation() {
+      document.querySelectorAll('.sim-stage').forEach(s => s.classList.remove('visible'));
+      document.querySelectorAll('.sim-device').forEach(d => d.classList.remove('active'));
+      ['alicePlainText','plainMsg','aliceKeyText','sharedSecretText','kdfInput',
+       'msgKeyText','encInput','cipherText','serverSees','serverKnows','bobReceived','bobPlain'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = id === 'alicePlainText' ? 'Waiting...' : id === 'plainMsg' ? 'Waiting for input...' : '-';
+      });
+      resetBtn.style.display = 'none';
+      simBtn.style.display = 'inline-flex';
+    }
+
+    /* ===== Copy code ===== */
+    function copyCode() {
+      const block = document.querySelector('.code-block');
+      const text = block.innerText
+        .replace('Copy', '')
+        .split('\n')
+        .filter(l => l.startsWith('$'))
+        .map(l => l.replace(/^\$\s*/, ''))
+        .join('\n');
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = block.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
