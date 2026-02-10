@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CipherLink — End-to-End Encrypted Chat</title>
-  <meta name="description" content="CipherLink: Security-first E2EE chat with Signal Protocol + v2/v3 hardening — post-quantum hybrid KEM, TreeKEM groups, metadata resistance, key transparency, Shamir key splitting, TLS enforcement, audit-ready. 156 tests. By Belkis Aslani." />
+  <title>CipherLink — Ende-zu-Ende verschlüsselter Chat</title>
+  <meta name="description" content="CipherLink: Sicherheitsorientierter E2EE-Chat mit Signal-Protokoll + v2/v3-Härtung — Post-Quanten Hybrid-KEM, TreeKEM-Gruppen, Metadaten-Resistenz, Schlüsseltransparenz, Shamir-Schlüsselaufteilung, TLS-Durchsetzung, audit-bereit. 156 Tests. Von Belkis Aslani." />
   <style>
     /* ===== RESET & BASE ===== */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -536,18 +536,18 @@
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="#simulation">Demo</a></li>
-        <li><a href="#features">Features</a></li>
-        <li><a href="#architecture">Architecture</a></li>
-        <li><a href="#security">Security</a></li>
-        <li><a href="#start">Get Started</a></li>
+        <li><a href="#features">Funktionen</a></li>
+        <li><a href="#architecture">Architektur</a></li>
+        <li><a href="#security">Sicherheit</a></li>
+        <li><a href="#start">Loslegen</a></li>
         <li><a href="SECURITY_ARCHITECTURE_V2.md">v2 Docs</a></li>
-        <li><a href="audit/">Audit Pack</a></li>
+        <li><a href="audit/">Audit-Paket</a></li>
         <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
       </ul>
       <div class="lang-switch" id="langSwitch">
         <span class="slider" id="langSlider"></span>
-        <a href="index.html" class="active" id="langEN">EN</a>
-        <a href="de.html" id="langDE">DE</a>
+        <a href="index.html" id="langEN">EN</a>
+        <a href="de.html" class="active" id="langDE">DE</a>
       </div>
     </div>
   </nav>
@@ -557,29 +557,29 @@
     <div>
       <div class="hero-badge">
         <span class="dot"></span>
-        E2EE with v3 Production Hardening
+        E2EE mit v3 Produktionshärtung
       </div>
       <h1>
-        Messages that<br>
-        <span class="gradient">only you can read</span>
+        Nachrichten, die<br>
+        <span class="gradient">nur du lesen kannst</span>
       </h1>
       <p>
-        Signal Protocol + v3 production hardening — post-quantum hybrid KEM, TreeKEM groups,
-        metadata resistance, key transparency, TLS enforcement, audit-ready security documentation.
-        Zero-knowledge server. 156 tests (unit, property-based, fuzz, adversarial).
+        Signal-Protokoll + v3-Produktionshärtung — Post-Quanten Hybrid-KEM, TreeKEM-Gruppen,
+        Metadaten-Resistenz, Schlüsseltransparenz, TLS-Durchsetzung, audit-bereite Sicherheitsdokumentation.
+        Zero-Knowledge-Server. 156 Tests (Unit, Property-basiert, Fuzz, Adversarial).
       </p>
       <div class="hero-buttons">
         <a href="#simulation" class="btn btn-primary">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          See How It Works
+          So funktioniert's
         </a>
         <a href="https://github.com/BEKO2210/cipherlink" target="_blank" class="btn btn-outline">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          View on GitHub
+          Auf GitHub ansehen
         </a>
       </div>
       <p class="hero-warning">
-        Audit recommended before high-risk production use. See <a href="audit/" style="color:var(--warning)">Audit Pack</a> &amp; <a href="SECURITY_ARCHITECTURE_V2.md" style="color:var(--warning)">Security Architecture</a>.
+        Audit vor Produktiveinsatz mit hohem Risiko empfohlen. Siehe <a href="audit/" style="color:var(--warning)">Audit-Paket</a> &amp; <a href="SECURITY_ARCHITECTURE_V2.md" style="color:var(--warning)">Sicherheitsarchitektur</a>.
       </p>
     </div>
   </section>
@@ -588,10 +588,10 @@
   <section class="sim-section" id="simulation">
     <div class="container">
       <div class="reveal">
-        <div class="section-label">Interactive Demo</div>
-        <h2 class="section-title">End-to-End Encryption in Action</h2>
+        <div class="section-label">Interaktive Demo</div>
+        <h2 class="section-title">Ende-zu-Ende-Verschlüsselung in Aktion</h2>
         <p class="section-desc">
-          Watch how CipherLink encrypts a message from Alice to Bob. The server only ever sees ciphertext.
+          Sieh zu, wie CipherLink eine Nachricht von Alice an Bob verschlüsselt. Der Server sieht ausschließlich Chiffretext.
         </p>
       </div>
 
@@ -600,112 +600,112 @@
         <div style="text-align:center;margin-bottom:24px;">
           <button class="btn btn-primary" id="simStart" style="font-family:var(--font);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            Run Encryption Demo
+            Verschlüsselungs-Demo starten
           </button>
           <button class="btn btn-outline" id="simReset" style="font-family:var(--font);display:none;">
-            Reset Demo
+            Demo zurücksetzen
           </button>
         </div>
 
         <div class="sim-stages" id="simStages">
-          <!-- Stage 1: Plaintext -->
+          <!-- Schritt 1: Klartext -->
           <div class="sim-stage" data-stage="1">
             <div class="sim-device" id="alicePlain">
-              <div class="label">Alice's Device</div>
-              <div class="content" id="alicePlainText">Waiting...</div>
+              <div class="label">Alices Gerät</div>
+              <div class="content" id="alicePlainText">Warte...</div>
             </div>
             <div class="sim-arrow">
-              <div class="sim-step-label">Step 1</div>
+              <div class="sim-step-label">Schritt 1</div>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              <div class="sim-step-label">Compose</div>
+              <div class="sim-step-label">Verfassen</div>
             </div>
             <div class="sim-device">
-              <div class="label">Message</div>
-              <div class="content" id="plainMsg">Waiting for input...</div>
+              <div class="label">Nachricht</div>
+              <div class="content" id="plainMsg">Warte auf Eingabe...</div>
             </div>
           </div>
 
-          <!-- Stage 2: Key Exchange -->
+          <!-- Schritt 2: Schlüsselaustausch -->
           <div class="sim-stage" data-stage="2">
             <div class="sim-device" id="aliceKeys">
-              <div class="label">Alice's Keys</div>
+              <div class="label">Alices Schlüssel</div>
               <div class="content" id="aliceKeyText">-</div>
             </div>
             <div class="sim-arrow">
-              <div class="sim-step-label">Step 2</div>
+              <div class="sim-step-label">Schritt 2</div>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               <div class="sim-step-label">X25519 DH</div>
             </div>
             <div class="sim-device" id="bobKeys">
-              <div class="label">Shared Secret</div>
+              <div class="label">Gemeinsames Geheimnis</div>
               <div class="content" id="sharedSecretText">-</div>
             </div>
           </div>
 
-          <!-- Stage 3: KDF -->
+          <!-- Schritt 3: KDF -->
           <div class="sim-stage" data-stage="3">
             <div class="sim-device">
               <div class="label">HKDF-SHA256</div>
               <div class="content" id="kdfInput">-</div>
             </div>
             <div class="sim-arrow">
-              <div class="sim-step-label">Step 3</div>
+              <div class="sim-step-label">Schritt 3</div>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              <div class="sim-step-label">Derive Key</div>
+              <div class="sim-step-label">Schlüssel ableiten</div>
             </div>
             <div class="sim-device">
-              <div class="label">Message Key (256-bit)</div>
+              <div class="label">Nachrichtenschlüssel (256-Bit)</div>
               <div class="content" id="msgKeyText">-</div>
             </div>
           </div>
 
-          <!-- Stage 4: Encryption -->
+          <!-- Schritt 4: Verschlüsselung -->
           <div class="sim-stage" data-stage="4">
             <div class="sim-device">
               <div class="label">XChaCha20-Poly1305</div>
               <div class="content" id="encInput">-</div>
             </div>
             <div class="sim-arrow">
-              <div class="sim-step-label">Step 4</div>
+              <div class="sim-step-label">Schritt 4</div>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              <div class="sim-step-label">Encrypt</div>
+              <div class="sim-step-label">Verschlüsseln</div>
             </div>
             <div class="sim-device">
-              <div class="label">Ciphertext + Auth Tag</div>
+              <div class="label">Chiffretext + Auth-Tag</div>
               <div class="content cipher" id="cipherText">-</div>
             </div>
           </div>
 
-          <!-- Stage 5: Server relay -->
+          <!-- Schritt 5: Server-Weiterleitung -->
           <div class="sim-stage" data-stage="5">
             <div class="sim-device">
-              <div class="label">Relay Server</div>
+              <div class="label">Relay-Server</div>
               <div class="content cipher" id="serverSees">-</div>
             </div>
             <div class="sim-arrow">
-              <div class="sim-step-label">Step 5</div>
+              <div class="sim-step-label">Schritt 5</div>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              <div class="sim-step-label">Forward</div>
+              <div class="sim-step-label">Weiterleiten</div>
             </div>
             <div class="sim-device" id="serverNote">
-              <div class="label">Server Knowledge</div>
+              <div class="label">Server-Wissen</div>
               <div class="content" id="serverKnows">-</div>
             </div>
           </div>
 
-          <!-- Stage 6: Decryption -->
+          <!-- Schritt 6: Entschlüsselung -->
           <div class="sim-stage" data-stage="6">
             <div class="sim-device">
-              <div class="label">Bob's Device</div>
+              <div class="label">Bobs Gerät</div>
               <div class="content" id="bobReceived">-</div>
             </div>
             <div class="sim-arrow">
-              <div class="sim-step-label">Step 6</div>
+              <div class="sim-step-label">Schritt 6</div>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              <div class="sim-step-label">Decrypt</div>
+              <div class="sim-step-label">Entschlüsseln</div>
             </div>
             <div class="sim-device">
-              <div class="label">Plaintext Recovered</div>
+              <div class="label">Klartext wiederhergestellt</div>
               <div class="content success" id="bobPlain">-</div>
             </div>
           </div>
@@ -714,14 +714,14 @@
     </div>
   </section>
 
-  <!-- Features -->
+  <!-- Funktionen -->
   <section class="features-section" id="features">
     <div class="container">
       <div class="reveal">
-        <div class="section-label">Capabilities</div>
-        <h2 class="section-title">Built for Security</h2>
+        <div class="section-label">Funktionen</div>
+        <h2 class="section-title">Gebaut für Sicherheit</h2>
         <p class="section-desc">
-          Every design decision prioritizes cryptographic soundness and zero-trust principles.
+          Jede Designentscheidung priorisiert kryptographische Korrektheit und Zero-Trust-Prinzipien.
         </p>
       </div>
 
@@ -730,66 +730,66 @@
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
           </div>
-          <h3>X3DH Key Agreement</h3>
-          <p>Extended Triple Diffie-Hellman with Ed25519 identity keys, signed prekeys, and one-time prekeys. Asynchronous session setup — Bob can be offline.</p>
+          <h3>X3DH-Schlüsselvereinbarung</h3>
+          <p>Extended Triple Diffie-Hellman mit Ed25519-Identitätsschlüsseln, signierten Prekeys und Einmal-Prekeys. Asynchroner Sitzungsaufbau — Bob kann offline sein.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
           </div>
           <h3>Double Ratchet</h3>
-          <p>Forward secrecy and post-compromise security via continuous key rotation. DH ratchet + symmetric KDF chains. Past keys are irrecoverable.</p>
+          <p>Forward Secrecy und Post-Compromise-Sicherheit durch kontinuierliche Schlüsselrotation. DH-Ratchet + symmetrische KDF-Ketten. Vergangene Schlüssel sind unwiederbringlich.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <h3>Sealed Sender</h3>
-          <p>Sender identity encrypted via ephemeral DH keypair. The server only knows the recipient — not who sent the message.</p>
+          <p>Absenderidentität verschlüsselt über ephemeres DH-Schlüsselpaar. Der Server kennt nur den Empfänger — nicht den Absender der Nachricht.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
-          <h3>Sender Keys Groups</h3>
-          <p>Efficient group E2EE using the Sender Keys protocol. Chain ratchet encryption with Ed25519 signatures on every group message.</p>
+          <h3>Sender-Keys-Gruppen</h3>
+          <p>Effiziente Gruppen-E2EE mit dem Sender-Keys-Protokoll. Ketten-Ratchet-Verschlüsselung mit Ed25519-Signaturen bei jeder Gruppennachricht.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           </div>
-          <h3>Safety Numbers</h3>
-          <p>Signal-style 60-digit safety numbers via 5200 iterations of SHA-512. QR code payloads for in-person key verification.</p>
+          <h3>Sicherheitsnummern</h3>
+          <p>Signal-kompatible 60-stellige Sicherheitsnummern über 5200 SHA-512-Iterationen. QR-Code-Payloads für persönliche Schlüsselverifizierung.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <h3>Zero-Knowledge Server</h3>
-          <p>The relay never sees plaintext, keys, or sender identity. It routes encrypted envelopes and forgets everything. 50K replay dedup cache.</p>
+          <h3>Zero-Knowledge-Server</h3>
+          <p>Der Relay sieht niemals Klartext, Schlüssel oder Absenderidentität. Er leitet verschlüsselte Umschläge weiter und vergisst alles. 50K Replay-Deduplizierungs-Cache.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
-          <h3>Encrypted Backups</h3>
-          <p>Argon2id key derivation (256MB memory) + XChaCha20-Poly1305 encryption. Passphrase-protected backup and restore.</p>
+          <h3>Verschlüsselte Backups</h3>
+          <p>Argon2id-Schlüsselableitung (256MB Speicher) + XChaCha20-Poly1305-Verschlüsselung. Passphrase-geschütztes Backup und Wiederherstellung.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
-          <h3>Message Padding + Replay Guard</h3>
-          <p>PKCS7-style 256-byte block padding hides message length. Multi-layer replay protection with dedup, counters, and server cache.</p>
+          <h3>Nachrichten-Padding + Replay-Schutz</h3>
+          <p>PKCS7-artiges 256-Byte-Block-Padding verbirgt Nachrichtenlänge. Mehrstufiger Replay-Schutz mit Deduplizierung, Zählern und Server-Cache.</p>
         </div>
       </div>
 
-      <!-- v2 Security Hardening -->
+      <!-- v2 Sicherheitshärtung -->
       <div class="reveal" style="margin-top:80px;">
-        <div class="section-label">v2 Hardening</div>
-        <h2 class="section-title">Next-Generation Security</h2>
+        <div class="section-label">v2 Härtung</div>
+        <h2 class="section-title">Sicherheit der nächsten Generation</h2>
         <p class="section-desc">
-          Defense-in-depth with post-quantum cryptography, metadata resistance, and formal protocol verification.
+          Defense-in-Depth mit Post-Quanten-Kryptographie, Metadaten-Resistenz und formaler Protokollverifikation.
         </p>
       </div>
 
@@ -798,66 +798,66 @@
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           </div>
-          <h3>Post-Quantum Hybrid KEM</h3>
-          <p>X25519 + ML-KEM-768 (Kyber) hybrid key encapsulation. If either component is secure, the combined secret is secure. Defends against harvest-now-decrypt-later.</p>
+          <h3>Post-Quanten Hybrid-KEM</h3>
+          <p>X25519 + ML-KEM-768 (Kyber) hybride Schlüsselkapselung. Ist eine Komponente sicher, ist das kombinierte Geheimnis sicher. Schützt gegen Harvest-Now-Decrypt-Later.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           </div>
-          <h3>Cryptographic Agility</h3>
-          <p>Immutable cipher suite registry with negotiation. Classical (128-bit) and hybrid PQ (192-bit) suites. Policy enforcement for minimum security levels.</p>
+          <h3>Kryptographische Agilität</h3>
+          <p>Unveränderliche Cipher-Suite-Registry mit Aushandlung. Klassische (128-Bit) und hybride PQ (192-Bit) Suiten. Richtliniendurchsetzung für Mindestsicherheitsstufen.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
-          <h3>TreeKEM Group Protocol</h3>
-          <p>MLS-inspired tree-based group key agreement with O(log n) update complexity. Per-epoch secrets, Ed25519 signed updates, forward-secret group messaging.</p>
+          <h3>TreeKEM-Gruppenprotokoll</h3>
+          <p>MLS-inspirierte baumbasierte Gruppenschlüsselvereinbarung mit O(log n) Update-Komplexität. Pro-Epoch-Geheimnisse, Ed25519-signierte Updates, Forward-Secret-Gruppennachrichten.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </div>
-          <h3>Metadata Resistance</h3>
-          <p>Uniform 4096-byte envelopes make all messages identical in size. Cover traffic, message batching, and timing jitter defeat traffic analysis.</p>
+          <h3>Metadaten-Resistenz</h3>
+          <p>Einheitliche 4096-Byte-Umschläge machen alle Nachrichten größenidentisch. Cover-Traffic, Nachrichten-Batching und Timing-Jitter verhindern Traffic-Analyse.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           </div>
-          <h3>Key Transparency</h3>
-          <p>Merkle tree-based verifiable key directory. Signed tree heads, inclusion proofs, and client-side audit. Prevents silent key substitution by the server.</p>
+          <h3>Schlüsseltransparenz</h3>
+          <p>Merkle-Baum-basiertes verifizierbares Schlüsselverzeichnis. Signierte Baumköpfe, Inklusionsbeweise und Client-seitiges Audit. Verhindert stille Schlüsselsubstitution durch den Server.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="12" y1="16" x2="12" y2="19"/></svg>
           </div>
-          <h3>Shamir Key Splitting</h3>
-          <p>2-of-3 Shamir's Secret Sharing over GF(256). Backup key split across device, server, and printed recovery code. Any 2 shares reconstruct the key.</p>
+          <h3>Shamir-Schlüsselaufteilung</h3>
+          <p>2-von-3 Shamirs Secret Sharing über GF(256). Backup-Schlüssel aufgeteilt auf Gerät, Server und gedruckten Wiederherstellungscode. Beliebige 2 Teile rekonstruieren den Schlüssel.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
           <h3>SecureBuffer</h3>
-          <p>Misuse-resistant key wrapper. Use-after-wipe detection, RAII auto-cleanup scopes, JSON/toString leak prevention. Zero raw key exposure.</p>
+          <p>Missbrauchsresistenter Schlüssel-Wrapper. Use-After-Wipe-Erkennung, RAII-Auto-Cleanup-Scopes, JSON/toString-Leak-Prävention. Kein roher Schlüsselzugriff.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
-          <h3>Protocol State Machine</h3>
-          <p>Formal session lifecycle: UNINITIALIZED, PREKEY_PUBLISHED, KEY_AGREEMENT, RATCHETING, CLOSED. Invariant enforcement prevents undefined transitions.</p>
+          <h3>Protokoll-Zustandsautomat</h3>
+          <p>Formaler Sitzungslebenszyklus: UNINITIALIZED, PREKEY_PUBLISHED, KEY_AGREEMENT, RATCHETING, CLOSED. Invarianten-Durchsetzung verhindert undefinierte Übergänge.</p>
         </div>
       </div>
 
-      <!-- v3 Production Hardening -->
+      <!-- v3 Produktionshärtung -->
       <div class="reveal" style="margin-top:80px;">
-        <div class="section-label">v3 Production Hardening</div>
-        <h2 class="section-title">Audit-Ready Infrastructure</h2>
+        <div class="section-label">v3 Produktionshärtung</div>
+        <h2 class="section-title">Audit-bereite Infrastruktur</h2>
         <p class="section-desc">
-          Server hardening, dependency hygiene, comprehensive testing, and security documentation for production readiness.
+          Server-Härtung, Abhängigkeitshygiene, umfassende Tests und Sicherheitsdokumentation für Produktionsreife.
         </p>
       </div>
 
@@ -866,56 +866,56 @@
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <h3>TLS Enforcement</h3>
-          <p>Production guard blocks ws:// connections. Mandatory wss:// with configurable cert/key paths. Explicit opt-in required for insecure transport.</p>
+          <h3>TLS-Durchsetzung</h3>
+          <p>Produktions-Guard blockiert ws://-Verbindungen. Obligatorisches wss:// mit konfigurierbaren Zertifikats-/Schlüsselpfaden. Explizites Opt-in für unsicheren Transport erforderlich.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
-          <h3>Server Hardening</h3>
-          <p>IP-based connection limiting, WebSocket ping/pong keepalive, structured logging with level filtering, group fan-out cap (256), sanitized log output.</p>
+          <h3>Server-Härtung</h3>
+          <p>IP-basierte Verbindungslimitierung, WebSocket-Ping/Pong-Keepalive, strukturiertes Logging mit Level-Filterung, Gruppen-Fan-Out-Limit (256), bereinigte Log-Ausgabe.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           </div>
           <h3>156 Tests</h3>
-          <p>Unit, property-based (fast-check), fuzz, and adversarial tests. Protocol state invariants, AEAD corruption, replay detection, key mismatch, envelope manipulation.</p>
+          <p>Unit-, Property-basierte (fast-check), Fuzz- und Adversarial-Tests. Protokoll-Zustandsinvarianten, AEAD-Korruption, Replay-Erkennung, Schlüssel-Mismatch, Umschlag-Manipulation.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
-          <h3>Audit-Ready Docs</h3>
-          <p>Threat model (9 adversary classes), attack surface review, protocol state spec, 34 security claims mapped to code/tests, SECURITY.md disclosure policy.</p>
+          <h3>Audit-bereite Dokumentation</h3>
+          <p>Bedrohungsmodell (9 Angreiferklassen), Angriffsoberflächenanalyse, Protokoll-Zustandsspezifikation, 34 Sicherheitsaussagen mit Code-/Test-Zuordnung, SECURITY.md-Offenlegungsrichtlinie.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
           </div>
-          <h3>Dependency Hygiene</h3>
-          <p>Dependabot for npm + GitHub Actions. Lockfile integrity checks in CI. SBOM generation with 90-day artifact retention.</p>
+          <h3>Abhängigkeitshygiene</h3>
+          <p>Dependabot für npm + GitHub Actions. Lockfile-Integritätsprüfungen in CI. SBOM-Generierung mit 90-Tage-Artefakt-Aufbewahrung.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M9 6h6"/></svg>
           </div>
-          <h3>Multi-Device Design</h3>
-          <p>Complete design doc: per-device keypairs, QR/passphrase linking, device revocation, key transparency integration, 5-phase rollout plan.</p>
+          <h3>Multi-Device-Design</h3>
+          <p>Vollständiges Designdokument: Gerätespezifische Schlüsselpaare, QR-/Passphrase-Verknüpfung, Gerätewiderruf, Schlüsseltransparenz-Integration, 5-Phasen-Rollout-Plan.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Architecture -->
+  <!-- Architektur -->
   <section class="arch-section" id="architecture">
     <div class="container">
       <div class="reveal">
-        <div class="section-label">System Design</div>
-        <h2 class="section-title">Architecture</h2>
+        <div class="section-label">Systemdesign</div>
+        <h2 class="section-title">Architektur</h2>
         <p class="section-desc">
-          A clean separation between client-side encryption and a minimal relay server.
+          Eine klare Trennung zwischen clientseitiger Verschlüsselung und einem minimalen Relay-Server.
         </p>
       </div>
 
@@ -924,47 +924,47 @@
           <div class="icon">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
           </div>
-          <div class="title">Alice's Device</div>
-          <div class="desc">Expo RN + libsodium<br>SecureStore for keys<br>Encrypts before sending</div>
+          <div class="title">Alices Gerät</div>
+          <div class="desc">Expo RN + libsodium<br>SecureStore für Schlüssel<br>Verschlüsselt vor dem Senden</div>
         </div>
 
         <div class="arch-connector">
           <div class="line"></div>
-          <span>Ciphertext<br>only</span>
+          <span>Nur<br>Chiffretext</span>
         </div>
 
         <div class="arch-node" style="border-color:rgba(233,69,96,.3);">
           <div class="icon">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
           </div>
-          <div class="title">Relay Server</div>
-          <div class="desc">Node.js + ws<br>Zero knowledge<br>Route &amp; forget</div>
+          <div class="title">Relay-Server</div>
+          <div class="desc">Node.js + ws<br>Zero Knowledge<br>Weiterleiten &amp; Vergessen</div>
         </div>
 
         <div class="arch-connector">
           <div class="line"></div>
-          <span>Ciphertext<br>only</span>
+          <span>Nur<br>Chiffretext</span>
         </div>
 
         <div class="arch-node">
           <div class="icon">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
           </div>
-          <div class="title">Bob's Device</div>
-          <div class="desc">Expo RN + libsodium<br>SecureStore for keys<br>Decrypts on receive</div>
+          <div class="title">Bobs Gerät</div>
+          <div class="desc">Expo RN + libsodium<br>SecureStore für Schlüssel<br>Entschlüsselt beim Empfang</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Security -->
+  <!-- Sicherheit -->
   <section class="security-section" id="security">
     <div class="container">
       <div class="reveal">
-        <div class="section-label">Transparency</div>
-        <h2 class="section-title">Security Posture</h2>
+        <div class="section-label">Transparenz</div>
+        <h2 class="section-title">Sicherheitslage</h2>
         <p class="section-desc">
-          We document exactly what is protected and what isn't. No false claims of being "unhackable".
+          Wir dokumentieren exakt, was geschützt ist und was nicht. Keine falschen Behauptungen von „unhackbar".
         </p>
       </div>
 
@@ -972,38 +972,38 @@
         <div class="sec-card protected">
           <h4>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Protected Against
+            Geschützt gegen
           </h4>
           <ul>
-            <li>Server reading messages (XChaCha20-Poly1305 E2EE)</li>
-            <li>Past message exposure (forward secrecy via Double Ratchet)</li>
-            <li>Ongoing key compromise (post-compromise security)</li>
-            <li>Sender identity leakage (sealed sender)</li>
-            <li>MITM attacks (safety number verification)</li>
-            <li>Replay attacks (client dedup + server 50K cache)</li>
-            <li>Message length analysis (uniform 4096-byte envelopes)</li>
-            <li>Quantum computing threat (post-quantum hybrid KEM)</li>
-            <li>Traffic analysis (cover traffic + batching + jitter)</li>
-            <li>Key directory tampering (Merkle tree transparency)</li>
-            <li>Backup single-point-of-failure (Shamir 2-of-3 splitting)</li>
-            <li>Key material misuse (SecureBuffer with wipe detection)</li>
-            <li>Insecure transport (TLS enforcement in production)</li>
-            <li>Connection flooding (IP-based rate limiting)</li>
-            <li>Log data leaks (sanitized structured logging)</li>
-            <li>Dependency supply chain (Dependabot + lockfile integrity)</li>
+            <li>Server liest Nachrichten (XChaCha20-Poly1305 E2EE)</li>
+            <li>Offenlegung vergangener Nachrichten (Forward Secrecy via Double Ratchet)</li>
+            <li>Andauernde Schlüsselkompromittierung (Post-Compromise-Sicherheit)</li>
+            <li>Absenderidentitäts-Leak (Sealed Sender)</li>
+            <li>MITM-Angriffe (Sicherheitsnummer-Verifizierung)</li>
+            <li>Replay-Angriffe (Client-Deduplizierung + Server 50K Cache)</li>
+            <li>Nachrichtenlängenanalyse (einheitliche 4096-Byte-Umschläge)</li>
+            <li>Quantencomputing-Bedrohung (Post-Quanten Hybrid-KEM)</li>
+            <li>Traffic-Analyse (Cover-Traffic + Batching + Jitter)</li>
+            <li>Schlüsselverzeichnis-Manipulation (Merkle-Baum-Transparenz)</li>
+            <li>Backup-Single-Point-of-Failure (Shamir 2-von-3-Aufteilung)</li>
+            <li>Schlüsselmaterial-Missbrauch (SecureBuffer mit Wipe-Erkennung)</li>
+            <li>Unsicherer Transport (TLS-Durchsetzung in Produktion)</li>
+            <li>Verbindungs-Flooding (IP-basiertes Rate-Limiting)</li>
+            <li>Log-Daten-Leaks (bereinigte strukturierte Protokollierung)</li>
+            <li>Abhängigkeits-Supply-Chain (Dependabot + Lockfile-Integrität)</li>
           </ul>
         </div>
         <div class="sec-card known-limits">
           <h4>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Remaining Considerations
+            Offene Punkte
           </h4>
           <ul>
-            <li>No multi-device support yet (design doc complete, implementation pending)</li>
-            <li>PQ KEM uses Kyber wire format placeholder (ready for native drop-in)</li>
-            <li>No disappearing messages or remote wipe</li>
-            <li>No server integration tests yet</li>
-            <li>Needs independent security audit for production</li>
+            <li>Noch keine Multi-Device-Unterstützung (Designdokument fertig, Implementierung ausstehend)</li>
+            <li>PQ-KEM nutzt Kyber-Wire-Format-Platzhalter (bereit für nativen Drop-in)</li>
+            <li>Keine verschwindenden Nachrichten oder Remote-Wipe</li>
+            <li>Noch keine Server-Integrationstests</li>
+            <li>Unabhängiges Sicherheitsaudit für Produktion erforderlich</li>
           </ul>
         </div>
       </div>
@@ -1014,14 +1014,14 @@
   <section class="stack-section">
     <div class="container">
       <div class="reveal">
-        <div class="section-label">Technology</div>
+        <div class="section-label">Technologie</div>
         <h2 class="section-title">Tech Stack</h2>
       </div>
 
       <div class="stack-grid reveal">
         <div class="stack-item">
           <div class="name">libsodium</div>
-          <div class="role">Cryptography</div>
+          <div class="role">Kryptographie</div>
         </div>
         <div class="stack-item">
           <div class="name">Expo</div>
@@ -1029,11 +1029,11 @@
         </div>
         <div class="stack-item">
           <div class="name">TypeScript</div>
-          <div class="role">Strict Mode</div>
+          <div class="role">Strict-Modus</div>
         </div>
         <div class="stack-item">
           <div class="name">Node.js</div>
-          <div class="role">Server Runtime</div>
+          <div class="role">Server-Laufzeit</div>
         </div>
         <div class="stack-item">
           <div class="name">ws</div>
@@ -1041,19 +1041,19 @@
         </div>
         <div class="stack-item">
           <div class="name">Zod</div>
-          <div class="role">Validation</div>
+          <div class="role">Validierung</div>
         </div>
         <div class="stack-item">
           <div class="name">pnpm</div>
-          <div class="role">Workspace</div>
+          <div class="role">Arbeitsbereich</div>
         </div>
         <div class="stack-item">
           <div class="name">Vitest</div>
-          <div class="role">Testing</div>
+          <div class="role">Tests</div>
         </div>
         <div class="stack-item">
           <div class="name">fast-check</div>
-          <div class="role">Property Testing</div>
+          <div class="role">Property-Tests</div>
         </div>
         <div class="stack-item">
           <div class="name">GitHub Actions</div>
@@ -1061,39 +1061,39 @@
         </div>
         <div class="stack-item">
           <div class="name">SecureStore</div>
-          <div class="role">Key Storage</div>
+          <div class="role">Schlüsselspeicher</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Getting Started -->
+  <!-- Schnellstart -->
   <section class="start-section" id="start">
     <div class="container">
       <div class="reveal">
-        <div class="section-label">Quick Start</div>
-        <h2 class="section-title">Get Running in 60 Seconds</h2>
+        <div class="section-label">Schnellstart</div>
+        <h2 class="section-title">In 60 Sekunden loslegen</h2>
         <p class="section-desc">
-          Clone, install, start. That's it.
+          Klonen, installieren, starten. Das war's.
         </p>
       </div>
 
       <div class="code-block reveal">
-        <button class="copy-btn" onclick="copyCode()">Copy</button>
-<span class="comment"># Clone the repository</span>
+        <button class="copy-btn" onclick="copyCode()">Kopieren</button>
+<span class="comment"># Repository klonen</span>
 <span class="prompt">$</span> <span class="cmd">git clone https://github.com/BEKO2210/cipherlink.git</span>
 <span class="prompt">$</span> <span class="cmd">cd cipherlink</span>
 
-<span class="comment"># Install dependencies</span>
+<span class="comment"># Abhängigkeiten installieren</span>
 <span class="prompt">$</span> <span class="cmd">pnpm install</span>
 
-<span class="comment"># Start the zero-knowledge relay server</span>
+<span class="comment"># Zero-Knowledge-Relay-Server starten</span>
 <span class="prompt">$</span> <span class="cmd">pnpm dev:server</span>
 
-<span class="comment"># In another terminal — start the Expo mobile app</span>
+<span class="comment"># In einem weiteren Terminal — Expo-Mobile-App starten</span>
 <span class="prompt">$</span> <span class="cmd">pnpm dev:mobile</span>
 
-<span class="comment"># Run all 156 tests (57 v1 + 63 v2 + 36 v3 hardening)</span>
+<span class="comment"># Alle 156 Tests ausführen (57 v1 + 63 v2 + 36 v3 Härtung)</span>
 <span class="prompt">$</span> <span class="cmd">pnpm test</span>
       </div>
     </div>
@@ -1103,33 +1103,34 @@
   <footer>
     <p>
       <span class="author">CipherLink</span> &mdash;
-      End-to-End Encrypted Chat Skeleton &mdash;
-      by <span class="author">Belkis Aslani</span>
+      Ende-zu-Ende verschlüsseltes Chat-Gerüst &mdash;
+      von <span class="author">Belkis Aslani</span>
     </p>
     <p style="margin-top:8px;font-size:.75rem;color:var(--text-dim);">
-      MIT License &mdash; Audit recommended before high-risk production use.
+      MIT-Lizenz &mdash; Audit vor Produktiveinsatz mit hohem Risiko empfohlen.
     </p>
   </footer>
 
   <script>
     /* ===== Language toggle slider positioning ===== */
     (function initLangSwitch() {
+      const sw = document.getElementById('langSwitch');
       const slider = document.getElementById('langSlider');
       const en = document.getElementById('langEN');
       const de = document.getElementById('langDE');
       function positionSlider() {
-        const active = en; // EN is active on this page
+        const active = de; // DE is active on this page
         slider.style.left = active.offsetLeft + 'px';
         slider.style.width = active.offsetWidth + 'px';
       }
       positionSlider();
       window.addEventListener('resize', positionSlider);
       // Hover preview
-      de.addEventListener('mouseenter', () => {
-        slider.style.left = de.offsetLeft + 'px';
-        slider.style.width = de.offsetWidth + 'px';
+      en.addEventListener('mouseenter', () => {
+        slider.style.left = en.offsetLeft + 'px';
+        slider.style.width = en.offsetWidth + 'px';
       });
-      de.addEventListener('mouseleave', positionSlider);
+      en.addEventListener('mouseleave', positionSlider);
     })();
 
     /* ===== Particles ===== */
@@ -1162,7 +1163,7 @@
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
     /* ===== E2EE Simulation ===== */
-    const MESSAGE = "Hey Bob, let's meet at the park at 3pm!";
+    const MESSAGE = "Hey Bob, lass uns um 15 Uhr im Park treffen!";
 
     function randomHex(len) {
       const chars = '0123456789abcdef';
@@ -1221,15 +1222,15 @@
       const nonce = randomHex(12) + '...';
       const ciphertext = randomHex(32) + '...';
 
-      // Stage 1 — Plaintext
+      // Schritt 1 — Klartext
       showStage(1);
       document.getElementById('alicePlain').classList.add('active');
-      await typeText(document.getElementById('alicePlainText'), 'Composing message...');
+      await typeText(document.getElementById('alicePlainText'), 'Nachricht wird verfasst...');
       await delay(300);
       await typeText(document.getElementById('plainMsg'), MESSAGE);
       await delay(500);
 
-      // Stage 2 — Key Exchange
+      // Schritt 2 — Schlüsselaustausch
       showStage(2);
       await delay(200);
       await typeText(document.getElementById('aliceKeyText'), 'Alice: ' + alicePub + '\nBob:   ' + bobPub, 20);
@@ -1237,34 +1238,34 @@
       await typeText(document.getElementById('sharedSecretText'), sharedSecret, 25);
       await delay(500);
 
-      // Stage 3 — KDF
+      // Schritt 3 — KDF
       showStage(3);
       await delay(200);
-      await typeText(document.getElementById('kdfInput'), 'Input: shared_secret\nSalt: 0x00...00\nInfo: "cipherlink-v1-message-key"', 15);
+      await typeText(document.getElementById('kdfInput'), 'Eingabe: shared_secret\nSalt: 0x00...00\nInfo: "cipherlink-v1-message-key"', 15);
       await delay(300);
       await typeText(document.getElementById('msgKeyText'), msgKey, 25);
       await delay(500);
 
-      // Stage 4 — Encryption
+      // Schritt 4 — Verschlüsselung
       showStage(4);
       await delay(200);
-      await typeText(document.getElementById('encInput'), 'Key: ' + msgKey + '\nNonce: ' + nonce + '\nAAD: {sender, recipient, ts, id, v1}', 12);
+      await typeText(document.getElementById('encInput'), 'Key: ' + msgKey + '\nNonce: ' + nonce + '\nAAD: {sender, empfänger, ts, id, v1}', 12);
       await delay(300);
       await typeText(document.getElementById('cipherText'), ciphertext, 15);
       await delay(500);
 
-      // Stage 5 — Server
+      // Schritt 5 — Server
       showStage(5);
       await delay(200);
       await typeText(document.getElementById('serverSees'), '{ v:1, ciphertext:"' + ciphertext.slice(0, 24) + '...", nonce:"' + nonce + '" }', 12);
       await delay(300);
-      await typeText(document.getElementById('serverKnows'), 'Plaintext? NONE.\nKeys? NONE.\nRole: Route & Forget.', 20);
+      await typeText(document.getElementById('serverKnows'), 'Klartext? KEINEN.\nSchlüssel? KEINE.\nRolle: Weiterleiten & Vergessen.', 20);
       await delay(500);
 
-      // Stage 6 — Decryption
+      // Schritt 6 — Entschlüsselung
       showStage(6);
       await delay(200);
-      await typeText(document.getElementById('bobReceived'), 'Received encrypted envelope.\nDeriving shared secret...\nDecrypting with XChaCha20-Poly1305...', 15);
+      await typeText(document.getElementById('bobReceived'), 'Verschlüsselten Umschlag empfangen.\nShared Secret wird abgeleitet...\nEntschlüsselung mit XChaCha20-Poly1305...', 15);
       await delay(400);
       await typeText(document.getElementById('bobPlain'), MESSAGE, 30);
     }
@@ -1276,7 +1277,7 @@
        'msgKeyText','encInput','cipherText','serverSees','serverKnows','bobReceived','bobPlain'
       ].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.textContent = id === 'alicePlainText' ? 'Waiting...' : id === 'plainMsg' ? 'Waiting for input...' : '-';
+        if (el) el.textContent = id === 'alicePlainText' ? 'Warte...' : id === 'plainMsg' ? 'Warte auf Eingabe...' : '-';
       });
       resetBtn.style.display = 'none';
       simBtn.style.display = 'inline-flex';
@@ -1286,15 +1287,15 @@
     function copyCode() {
       const block = document.querySelector('.code-block');
       const text = block.innerText
-        .replace('Copy', '')
+        .replace('Kopieren', '')
         .split('\n')
         .filter(l => l.startsWith('$'))
         .map(l => l.replace(/^\$\s*/, ''))
         .join('\n');
       navigator.clipboard.writeText(text).then(() => {
         const btn = block.querySelector('.copy-btn');
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+        btn.textContent = 'Kopiert!';
+        setTimeout(() => { btn.textContent = 'Kopieren'; }, 2000);
       });
     }
   </script>
