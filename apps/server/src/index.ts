@@ -8,13 +8,19 @@
  * - Group message fan-out
  * - Server-side replay protection
  * - Rate limiting + offline queue
+ * - TLS enforcement in production
+ * - IP-based connection limiting
+ * - WebSocket ping/pong keepalive
  *
  * The server NEVER sees plaintext messages.
  *
  * @author Belkis Aslani
  * @license MIT
  */
+import { createServer } from "https";
+import { readFileSync } from "fs";
 import { WebSocketServer, WebSocket } from "ws";
+import type { IncomingMessage } from "http";
 import { clientMessageSchema } from "./schema.js";
 import type {
   Envelope,
@@ -24,13 +30,42 @@ import type {
 } from "./schema.js";
 import { TokenBucket } from "./rate-limit.js";
 import { OfflineQueue } from "./queue.js";
+import { loadConfig } from "./config.js";
 
-const PORT = parseInt(process.env["PORT"] ?? "4200", 10);
-const MAX_MESSAGE_SIZE = 128 * 1024; // 128 KB
+// --- Configuration ---
+const config = loadConfig();
+
+// --- Structured logging with level filtering ---
+const LOG_LEVELS = { error: 0, warn: 1, info: 2, debug: 3 } as const;
+const currentLogLevel = LOG_LEVELS[config.logLevel];
+
+function log(level: "info" | "warn" | "error" | "debug", msg: string): void {
+  if (LOG_LEVELS[level] > currentLogLevel) return;
+  const ts = config.logTimestamps ? new Date().toISOString() + " " : "";
+  // SECURITY: Never log keys, secrets, ciphertext, or user-identifiable data.
+  // Only log operational events with sanitized context.
+  console.error(`${ts}[${level.toUpperCase()}] ${msg}`);
+}
+
+// --- Connection tracking per IP ---
+const connectionsPerIp = new Map<string, number>();
+const MAX_GROUP_RECIPIENTS = 256;
+
+function getClientIp(req: IncomingMessage): string {
+  // In production behind a reverse proxy, use X-Forwarded-For.
+  // Direct connections use socket remoteAddress.
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string") {
+    return forwarded.split(",")[0]?.trim() ?? "unknown";
+  }
+  return req.socket.remoteAddress ?? "unknown";
+}
 
 interface ClientState {
   publicKey: string | null;
   rateLimiter: TokenBucket;
+  ip: string;
+  pongReceived: boolean;
 }
 
 // --- Server state ---
@@ -57,15 +92,31 @@ function trackMessageId(msgId: string): boolean {
   return true; // New message
 }
 
-const wss = new WebSocketServer({
-  port: PORT,
-  maxPayload: MAX_MESSAGE_SIZE,
-});
+// --- Create server (TLS or plain) ---
+function createWebSocketServer(): WebSocketServer {
+  if (config.requireTls) {
+    const httpsServer = createServer({
+      cert: readFileSync(config.tlsCert!),
+      key: readFileSync(config.tlsKey!),
+    });
+    const wss = new WebSocketServer({
+      server: httpsServer,
+      maxPayload: config.maxPayloadBytes,
+    });
+    httpsServer.listen(config.port);
+    log("info", `Relay server listening on wss://localhost:${config.port} (TLS enabled)`);
+    return wss;
+  }
 
-function log(level: "info" | "warn" | "error", msg: string): void {
-  const ts = new Date().toISOString();
-  console.error(`[${ts}] [${level.toUpperCase()}] ${msg}`);
+  const wss = new WebSocketServer({
+    port: config.port,
+    maxPayload: config.maxPayloadBytes,
+  });
+  log("warn", `Relay server listening on ws://localhost:${config.port} (TLS DISABLED — development only)`);
+  return wss;
 }
+
+const wss = createWebSocketServer();
 
 function sendError(
   ws: WebSocket,
@@ -83,13 +134,51 @@ function requireAuth(ws: WebSocket, state: ClientState): boolean {
   return true;
 }
 
-wss.on("connection", (ws) => {
+// --- Ping/pong keepalive ---
+let pingInterval: ReturnType<typeof setInterval> | undefined;
+if (config.pingIntervalMs > 0) {
+  pingInterval = setInterval(() => {
+    for (const ws of wss.clients) {
+      const cState = clientState.get(ws);
+      if (cState && !cState.pongReceived) {
+        ws.terminate();
+        continue;
+      }
+      if (cState) {
+        cState.pongReceived = false;
+      }
+      ws.ping();
+    }
+  }, config.pingIntervalMs);
+}
+
+wss.on("connection", (ws, req) => {
+  const ip = getClientIp(req);
+
+  // IP-based connection limiting
+  if (config.maxConnectionsPerIp > 0) {
+    const current = connectionsPerIp.get(ip) ?? 0;
+    if (current >= config.maxConnectionsPerIp) {
+      log("warn", `Connection rejected: IP limit exceeded`);
+      ws.close(1013, "Too many connections from your address");
+      return;
+    }
+    connectionsPerIp.set(ip, current + 1);
+  }
+
   const state: ClientState = {
     publicKey: null,
     rateLimiter: new TokenBucket({ maxTokens: 30, refillRate: 5 }),
+    ip,
+    pongReceived: true,
   };
   clientState.set(ws, state);
   log("info", "Client connected");
+
+  ws.on("pong", () => {
+    const cState = clientState.get(ws);
+    if (cState) cState.pongReceived = true;
+  });
 
   ws.on("message", (raw) => {
     const cState = clientState.get(ws);
@@ -142,8 +231,17 @@ wss.on("connection", (ws) => {
     const cState = clientState.get(ws);
     if (cState?.publicKey) {
       clients.delete(cState.publicKey);
-      log("info", "Client disconnected");
     }
+    // Decrement IP connection count
+    if (config.maxConnectionsPerIp > 0) {
+      const current = connectionsPerIp.get(ip) ?? 1;
+      if (current <= 1) {
+        connectionsPerIp.delete(ip);
+      } else {
+        connectionsPerIp.set(ip, current - 1);
+      }
+    }
+    log("info", "Client disconnected");
   });
 
   ws.on("error", () => {
@@ -160,6 +258,7 @@ function handleHello(
   if (state.publicKey) clients.delete(state.publicKey);
   state.publicKey = publicKey;
   clients.set(publicKey, ws);
+  // SECURITY: Do not log the public key itself
   log("info", "Client authenticated");
 
   ws.send(JSON.stringify({ type: "welcome" }));
@@ -267,6 +366,12 @@ function handleSendGroup(
 ): void {
   if (!requireAuth(ws, state)) return;
 
+  // Cap recipient count to prevent fan-out amplification
+  if (recipients.length > MAX_GROUP_RECIPIENTS) {
+    sendError(ws, "TOO_MANY_RECIPIENTS", `Maximum ${MAX_GROUP_RECIPIENTS} recipients per group message`);
+    return;
+  }
+
   let delivered = 0;
   let queued = 0;
 
@@ -304,11 +409,11 @@ function handleSendGroup(
   );
 }
 
-log("info", `CipherLink relay server v2 listening on ws://localhost:${PORT}`);
 log("info", "Features: pairwise E2EE, sealed sender, prekey bundles, group messaging, replay protection");
 
 function shutdown(): void {
   log("info", "Shutting down...");
+  if (pingInterval) clearInterval(pingInterval);
   offlineQueue.destroy();
   wss.close(() => {
     process.exit(0);

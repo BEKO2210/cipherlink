@@ -10,14 +10,14 @@
 [![Node](https://img.shields.io/badge/Node.js-20+-339933.svg)](https://nodejs.org/)
 [![Expo](https://img.shields.io/badge/Expo-SDK_52-000020.svg)](https://expo.dev/)
 [![libsodium](https://img.shields.io/badge/Crypto-libsodium-7c4dff.svg)](https://doc.libsodium.org/)
-[![Tests](https://img.shields.io/badge/Tests-120_passing-4caf50.svg)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-156_passing-4caf50.svg)](#testing)
 [![Security Docs](https://img.shields.io/badge/Security-Documented-f5a623.svg)](docs/SECURITY_MODEL.md)
 
 <br />
 
-A security-first E2EE chat implementing the **Signal Protocol** with **v2 security hardening** — post-quantum hybrid KEM, MLS-inspired TreeKEM groups, metadata resistance, key transparency, Shamir key splitting, cryptographic agility, and formal protocol state machines. Zero-knowledge server. 120 passing tests.
+A security-first E2EE chat implementing the **Signal Protocol** with **v2 security hardening** — post-quantum hybrid KEM, MLS-inspired TreeKEM groups, metadata resistance, key transparency, Shamir key splitting, cryptographic agility, and formal protocol state machines. Zero-knowledge server. 156 passing tests.
 
-[Live Demo](https://beko2210.github.io/cipherlink/) · [Security Model](docs/SECURITY_MODEL.md) · [Threat Model](docs/THREAT_MODEL.md) · [Crypto Design](docs/CRYPTO_LIMITS.md) · [v2 Architecture](docs/SECURITY_ARCHITECTURE_V2.md)
+[Live Demo](https://beko2210.github.io/cipherlink/) · [Security Model](docs/SECURITY_MODEL.md) · [Threat Model](docs/THREAT_MODEL.md) · [Crypto Design](docs/CRYPTO_LIMITS.md) · [v2 Architecture](docs/SECURITY_ARCHITECTURE_V2.md) · [Audit Pack](docs/audit/)
 
 <br />
 
@@ -93,7 +93,7 @@ packages/crypto/             E2EE cryptographic library (libsodium)
     metadata-resistance.ts     Cover traffic, batching, uniform envelopes
     key-transparency.ts        Merkle tree key directory
     key-splitting.ts           Shamir's Secret Sharing (2-of-3)
-  __tests__/                 120 unit tests (vitest)
+  __tests__/                 156 tests (vitest) — unit, property-based, fuzz, adversarial
 
 apps/server/            Zero-knowledge WebSocket relay (Node.js + ws)
   src/index.ts          Routing, auth, sealed sender, groups, replay dedup
@@ -141,7 +141,7 @@ Scan the QR code with Expo Go on your phone.
 ### Testing
 
 ```bash
-# Run all 120 crypto unit tests (57 v1 + 63 v2)
+# Run all 156 crypto tests (57 v1 + 63 v2 + 36 v3 hardening)
 pnpm test
 
 # Lint all packages
@@ -199,7 +199,7 @@ Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Design](docs
 | Key Storage | expo-secure-store | Hardware-backed secure enclave |
 | Language | TypeScript (strict) | Type safety everywhere |
 | Monorepo | pnpm workspaces | Package management |
-| Testing | Vitest | 120 unit tests for crypto |
+| Testing | Vitest + fast-check | 156 tests (unit, property-based, fuzz, adversarial) |
 | CI | GitHub Actions | Lint, typecheck, test on every push |
 
 ## Cryptographic Modules
@@ -236,10 +236,62 @@ Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Design](docs
 
 | Document | Description |
 |---|---|
+| [SECURITY.md](SECURITY.md) | Responsible disclosure policy and contact |
 | [SECURITY_MODEL.md](docs/SECURITY_MODEL.md) | Architecture, protocol flow, key storage, server role |
 | [THREAT_MODEL.md](docs/THREAT_MODEL.md) | What is protected, what isn't, adversary model |
 | [CRYPTO_LIMITS.md](docs/CRYPTO_LIMITS.md) | Full feature status, remaining considerations, test coverage |
 | [SECURITY_ARCHITECTURE_V2.md](docs/SECURITY_ARCHITECTURE_V2.md) | v2 threat model, attack surface review, upgrade plan |
+
+### Audit Pack (`docs/audit/`)
+
+| Document | Description |
+|---|---|
+| [FEATURE_STATUS.md](docs/audit/FEATURE_STATUS.md) | Feature-by-feature implementation status table |
+| [threat-model.md](docs/audit/threat-model.md) | 9 adversary classes, security properties, known weaknesses |
+| [attack-surface.md](docs/audit/attack-surface.md) | Client/server/network attack surfaces, dependency risks |
+| [protocol-state-spec.md](docs/audit/protocol-state-spec.md) | Formal protocol state machine specification |
+| [security-claims.md](docs/audit/security-claims.md) | 34 security claims mapped to code and tests |
+
+### Design Documents (`docs/design/`)
+
+| Document | Description |
+|---|---|
+| [MULTI_DEVICE.md](docs/design/MULTI_DEVICE.md) | Multi-device architecture — device linking, revocation, per-device sessions |
+
+## Roadmap to 1.0
+
+### Completed
+
+- [x] **v1 Core Protocol** — X3DH, Double Ratchet, sealed sender, Sender Keys groups, safety numbers, encrypted backups, padding, replay protection
+- [x] **v2 Security Hardening** — post-quantum hybrid KEM, cryptographic agility, TreeKEM, metadata resistance, key transparency, Shamir key splitting, SecureBuffer, protocol state machine
+- [x] **v3 Production Hardening** — TLS enforcement, secure defaults, sanitized logging, IP-based connection limiting, ping/pong keepalive
+- [x] **Dependency Hygiene** — Dependabot, lockfile integrity checks, SBOM generation
+- [x] **Audit-Readiness Pack** — threat model, attack surface review, protocol spec, security claims mapping, SECURITY.md
+- [x] **Testing Upgrade** — 156 tests: unit, property-based (fast-check), fuzz, adversarial
+
+### In Progress
+
+- [ ] **Multi-Device Support** — [design doc complete](docs/design/MULTI_DEVICE.md), implementation pending checklist review
+  - Per-device keypairs (no private key sharing)
+  - Device linking via QR code / passphrase
+  - Per-device Double Ratchet sessions
+  - Device revocation with key transparency integration
+
+### Planned
+
+- [ ] **Server Test Suite** — integration tests for relay, routing, rate limiting, replay dedup
+- [ ] **Native PQ KEM** — replace Kyber placeholder with actual ML-KEM-768 when libsodium ships it
+- [ ] **Disappearing Messages** — time-based auto-deletion with sender/recipient enforcement
+- [ ] **Message History Sync** — encrypted cross-device history (requires multi-device)
+- [ ] **Third-Party Security Audit** — external review of crypto library and protocol implementation
+- [ ] **Certificate Pinning** — pin TLS certificates for the relay server
+
+### Out of Scope (1.0)
+
+- Federation / cross-server communication
+- Voice/video calls
+- File attachments (large blob transfer)
+- Account recovery without Shamir shares
 
 ## License
 
