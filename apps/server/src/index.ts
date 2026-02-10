@@ -1,33 +1,61 @@
 /**
  * CipherLink — Zero-knowledge WebSocket relay server.
  *
- * The server NEVER sees plaintext messages. It only routes encrypted
- * envelopes between clients identified by their public keys.
+ * Features:
+ * - V1 envelope routing (pairwise E2EE)
+ * - Sealed sender routing (sender hidden from server)
+ * - Prekey bundle storage/retrieval (for X3DH)
+ * - Group message fan-out
+ * - Server-side replay protection
+ * - Rate limiting + offline queue
  *
- * ⚠️  WARNING: This is a security skeleton for educational/demo purposes.
- *     NOT suitable for high-risk production use without significant hardening.
+ * The server NEVER sees plaintext messages.
  *
  * @author Belkis Aslani
  * @license MIT
  */
 import { WebSocketServer, WebSocket } from "ws";
 import { clientMessageSchema } from "./schema.js";
-import type { Envelope } from "./schema.js";
+import type {
+  Envelope,
+  SealedEnvelope,
+  PrekeyBundle,
+  GroupMessage,
+} from "./schema.js";
 import { TokenBucket } from "./rate-limit.js";
 import { OfflineQueue } from "./queue.js";
 
 const PORT = parseInt(process.env["PORT"] ?? "4200", 10);
-const MAX_MESSAGE_SIZE = 64 * 1024; // 64 KB
+const MAX_MESSAGE_SIZE = 128 * 1024; // 128 KB
 
 interface ClientState {
   publicKey: string | null;
   rateLimiter: TokenBucket;
 }
 
-// Maps publicKey -> WebSocket connection
+// --- Server state ---
 const clients = new Map<string, WebSocket>();
 const clientState = new WeakMap<WebSocket, ClientState>();
 const offlineQueue = new OfflineQueue();
+
+// Prekey bundle storage: publicKey -> bundle
+const prekeyStore = new Map<string, PrekeyBundle>();
+
+// Replay protection: track recent message IDs (server-side dedup)
+const recentMessageIds = new Set<string>();
+const messageIdOrder: string[] = [];
+const MAX_RECENT_IDS = 50_000;
+
+function trackMessageId(msgId: string): boolean {
+  if (recentMessageIds.has(msgId)) return false; // Duplicate
+  recentMessageIds.add(msgId);
+  messageIdOrder.push(msgId);
+  while (messageIdOrder.length > MAX_RECENT_IDS) {
+    const oldest = messageIdOrder.shift()!;
+    recentMessageIds.delete(oldest);
+  }
+  return true; // New message
+}
 
 const wss = new WebSocketServer({
   port: PORT,
@@ -36,8 +64,23 @@ const wss = new WebSocketServer({
 
 function log(level: "info" | "warn" | "error", msg: string): void {
   const ts = new Date().toISOString();
-  // Minimal operational logs only — never log message contents or keys
   console.error(`[${ts}] [${level.toUpperCase()}] ${msg}`);
+}
+
+function sendError(
+  ws: WebSocket,
+  code: string,
+  message: string,
+): void {
+  ws.send(JSON.stringify({ type: "error", code, message }));
+}
+
+function requireAuth(ws: WebSocket, state: ClientState): boolean {
+  if (!state.publicKey) {
+    sendError(ws, "NOT_AUTHENTICATED", "Send a 'hello' message first");
+    return false;
+  }
+  return true;
 }
 
 wss.on("connection", (ws) => {
@@ -46,22 +89,14 @@ wss.on("connection", (ws) => {
     rateLimiter: new TokenBucket({ maxTokens: 30, refillRate: 5 }),
   };
   clientState.set(ws, state);
-
   log("info", "Client connected");
 
   ws.on("message", (raw) => {
     const cState = clientState.get(ws);
     if (!cState) return;
 
-    // Rate limiting
     if (!cState.rateLimiter.consume()) {
-      ws.send(
-        JSON.stringify({
-          type: "error",
-          code: "RATE_LIMITED",
-          message: "Too many messages. Please slow down.",
-        }),
-      );
+      sendError(ws, "RATE_LIMITED", "Too many messages. Please slow down.");
       return;
     }
 
@@ -69,34 +104,37 @@ wss.on("connection", (ws) => {
     try {
       data = JSON.parse(raw.toString("utf-8"));
     } catch {
-      ws.send(
-        JSON.stringify({
-          type: "error",
-          code: "INVALID_JSON",
-          message: "Could not parse JSON",
-        }),
-      );
+      sendError(ws, "INVALID_JSON", "Could not parse JSON");
       return;
     }
 
     const parsed = clientMessageSchema.safeParse(data);
     if (!parsed.success) {
-      ws.send(
-        JSON.stringify({
-          type: "error",
-          code: "INVALID_MESSAGE",
-          message: "Schema validation failed",
-        }),
-      );
+      sendError(ws, "INVALID_MESSAGE", "Schema validation failed");
       return;
     }
 
     const msg = parsed.data;
 
-    if (msg.type === "hello") {
-      handleHello(ws, cState, msg.publicKey);
-    } else if (msg.type === "send") {
-      handleSend(ws, cState, msg.envelope);
+    switch (msg.type) {
+      case "hello":
+        handleHello(ws, cState, msg.publicKey);
+        break;
+      case "send":
+        handleSend(ws, cState, msg.envelope);
+        break;
+      case "send_sealed":
+        handleSendSealed(ws, cState, msg.envelope);
+        break;
+      case "publish_prekeys":
+        handlePublishPrekeys(ws, cState, msg.bundle);
+        break;
+      case "fetch_prekeys":
+        handleFetchPrekeys(ws, cState, msg.publicKey);
+        break;
+      case "send_group":
+        handleSendGroup(ws, cState, msg.groupId, msg.message, msg.recipients);
+        break;
     }
   });
 
@@ -109,88 +147,166 @@ wss.on("connection", (ws) => {
   });
 
   ws.on("error", () => {
-    // Errors are logged but content is never exposed
     log("error", "WebSocket error on connection");
   });
 });
 
+// --- Hello ---
 function handleHello(
   ws: WebSocket,
   state: ClientState,
   publicKey: string,
 ): void {
-  // Remove previous registration if reconnecting
-  if (state.publicKey) {
-    clients.delete(state.publicKey);
-  }
-
+  if (state.publicKey) clients.delete(state.publicKey);
   state.publicKey = publicKey;
   clients.set(publicKey, ws);
-
   log("info", "Client authenticated");
 
   ws.send(JSON.stringify({ type: "welcome" }));
 
-  // Deliver any queued messages
   const queued = offlineQueue.drain(publicKey);
   for (const envelope of queued) {
     ws.send(JSON.stringify({ type: "message", envelope }));
   }
-
   if (queued.length > 0) {
     log("info", `Delivered ${queued.length} queued message(s)`);
   }
 }
 
+// --- V1 Send (pairwise) ---
 function handleSend(
   ws: WebSocket,
   state: ClientState,
   envelope: Envelope,
 ): void {
-  if (!state.publicKey) {
-    ws.send(
-      JSON.stringify({
-        type: "error",
-        code: "NOT_AUTHENTICATED",
-        message: "Send a 'hello' message first",
-      }),
-    );
+  if (!requireAuth(ws, state)) return;
+
+  if (envelope.senderPub !== state.publicKey) {
+    sendError(ws, "SENDER_MISMATCH", "Envelope senderPub does not match your authenticated key");
     return;
   }
 
-  // Verify the sender claim matches the authenticated public key
-  if (envelope.senderPub !== state.publicKey) {
-    ws.send(
-      JSON.stringify({
-        type: "error",
-        code: "SENDER_MISMATCH",
-        message: "Envelope senderPub does not match your authenticated key",
-      }),
-    );
+  // Server-side replay protection
+  if (!trackMessageId(envelope.msgId)) {
+    sendError(ws, "DUPLICATE_MESSAGE", "Message ID already seen (replay rejected)");
     return;
   }
 
   const recipientWs = clients.get(envelope.recipientPub);
-
   if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
-    // Forward to online recipient
     recipientWs.send(JSON.stringify({ type: "message", envelope }));
-    ws.send(
-      JSON.stringify({ type: "ack", msgId: envelope.msgId, status: "delivered" }),
-    );
+    ws.send(JSON.stringify({ type: "ack", msgId: envelope.msgId, status: "delivered" }));
   } else {
-    // Queue for offline recipient
     offlineQueue.enqueue(envelope.recipientPub, envelope);
-    ws.send(
-      JSON.stringify({ type: "ack", msgId: envelope.msgId, status: "queued" }),
-    );
+    ws.send(JSON.stringify({ type: "ack", msgId: envelope.msgId, status: "queued" }));
   }
 }
 
-log("info", `CipherLink relay server listening on ws://localhost:${PORT}`);
-log("info", "Zero-knowledge mode: server never sees plaintext messages");
+// --- Sealed Sender ---
+function handleSendSealed(
+  ws: WebSocket,
+  state: ClientState,
+  envelope: SealedEnvelope,
+): void {
+  if (!requireAuth(ws, state)) return;
 
-// Graceful shutdown
+  // No sender verification possible — that's the point of sealed sender!
+  // Server only knows the recipient.
+  const recipientWs = clients.get(envelope.recipientPub);
+  if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
+    recipientWs.send(JSON.stringify({ type: "sealed_message", envelope }));
+    ws.send(JSON.stringify({ type: "ack", status: "delivered" }));
+  } else {
+    // Queue sealed envelopes too
+    offlineQueue.enqueue(envelope.recipientPub, envelope);
+    ws.send(JSON.stringify({ type: "ack", status: "queued" }));
+  }
+}
+
+// --- Prekey Bundles ---
+function handlePublishPrekeys(
+  ws: WebSocket,
+  state: ClientState,
+  bundle: PrekeyBundle,
+): void {
+  if (!requireAuth(ws, state)) return;
+
+  // Verify the bundle's identity key matches the authenticated key
+  if (bundle.identityKey !== state.publicKey) {
+    sendError(ws, "IDENTITY_MISMATCH", "Bundle identity key does not match authenticated key");
+    return;
+  }
+
+  prekeyStore.set(state.publicKey!, bundle);
+  ws.send(JSON.stringify({ type: "prekeys_stored" }));
+  log("info", "Prekey bundle stored");
+}
+
+function handleFetchPrekeys(
+  ws: WebSocket,
+  state: ClientState,
+  targetPublicKey: string,
+): void {
+  if (!requireAuth(ws, state)) return;
+
+  const bundle = prekeyStore.get(targetPublicKey);
+  if (bundle) {
+    ws.send(JSON.stringify({ type: "prekey_bundle", bundle }));
+  } else {
+    ws.send(JSON.stringify({ type: "prekey_bundle", bundle: null }));
+  }
+}
+
+// --- Group Messages ---
+function handleSendGroup(
+  ws: WebSocket,
+  state: ClientState,
+  _groupId: string,
+  message: GroupMessage,
+  recipients: string[],
+): void {
+  if (!requireAuth(ws, state)) return;
+
+  let delivered = 0;
+  let queued = 0;
+
+  for (const recipientPub of recipients) {
+    // Don't send back to sender
+    if (recipientPub === state.publicKey) continue;
+
+    const recipientWs = clients.get(recipientPub);
+    if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
+      recipientWs.send(
+        JSON.stringify({
+          type: "group_message",
+          senderPub: state.publicKey,
+          message,
+        }),
+      );
+      delivered++;
+    } else {
+      offlineQueue.enqueue(recipientPub, {
+        _type: "group",
+        senderPub: state.publicKey,
+        message,
+      });
+      queued++;
+    }
+  }
+
+  ws.send(
+    JSON.stringify({
+      type: "group_ack",
+      groupId: message.groupId,
+      delivered,
+      queued,
+    }),
+  );
+}
+
+log("info", `CipherLink relay server v2 listening on ws://localhost:${PORT}`);
+log("info", "Features: pairwise E2EE, sealed sender, prekey bundles, group messaging, replay protection");
+
 function shutdown(): void {
   log("info", "Shutting down...");
   offlineQueue.destroy();

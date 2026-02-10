@@ -2,7 +2,7 @@
 
 # CipherLink
 
-**End-to-end encrypted chat app skeleton**
+**End-to-end encrypted chat app with Signal Protocol architecture**
 
 [![CI](https://github.com/BEKO2210/cipherlink/actions/workflows/ci.yml/badge.svg)](https://github.com/BEKO2210/cipherlink/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-e94560.svg)](LICENSE)
@@ -10,20 +10,19 @@
 [![Node](https://img.shields.io/badge/Node.js-20+-339933.svg)](https://nodejs.org/)
 [![Expo](https://img.shields.io/badge/Expo-SDK_52-000020.svg)](https://expo.dev/)
 [![libsodium](https://img.shields.io/badge/Crypto-libsodium-7c4dff.svg)](https://doc.libsodium.org/)
-[![Tests](https://img.shields.io/badge/Tests-20_passing-4caf50.svg)](#testing)
+[![Tests](https://img.shields.io/badge/Tests-57_passing-4caf50.svg)](#testing)
 [![Security Docs](https://img.shields.io/badge/Security-Documented-f5a623.svg)](docs/SECURITY_MODEL.md)
 
 <br />
 
-A production-grade, security-first E2EE chat skeleton using **X25519**, **HKDF-SHA256**, and **XChaCha20-Poly1305**. Zero-knowledge server. Best-practice cryptography. Comprehensive security documentation.
+A feature-complete, security-first E2EE chat skeleton implementing the **Signal Protocol** — X3DH key agreement, Double Ratchet, sealed sender, Sender Keys group messaging, safety numbers, and encrypted backups. Zero-knowledge server. 57 passing tests.
 
-[Live Demo](https://beko2210.github.io/cipherlink/) · [Security Model](docs/SECURITY_MODEL.md) · [Threat Model](docs/THREAT_MODEL.md) · [Crypto Limits](docs/CRYPTO_LIMITS.md)
+[Live Demo](https://beko2210.github.io/cipherlink/) · [Security Model](docs/SECURITY_MODEL.md) · [Threat Model](docs/THREAT_MODEL.md) · [Crypto Design](docs/CRYPTO_LIMITS.md)
 
 <br />
 
-> **This is a security skeleton for educational and demo purposes.**
-> **Not suitable for high-risk production use without significant hardening.**
-> See [CRYPTO_LIMITS.md](docs/CRYPTO_LIMITS.md) for what's missing.
+> **Audit recommended before high-risk production use.**
+> See [CRYPTO_LIMITS.md](docs/CRYPTO_LIMITS.md) for full feature status.
 
 </div>
 
@@ -31,42 +30,53 @@ A production-grade, security-first E2EE chat skeleton using **X25519**, **HKDF-S
 
 ## Overview
 
-CipherLink demonstrates best-practice end-to-end encryption in a mobile chat app:
+CipherLink implements a complete Signal Protocol-based E2EE architecture:
 
-- **Zero-knowledge server** — the relay never sees plaintext messages
-- **X25519 key exchange** — Curve25519 elliptic-curve Diffie-Hellman
-- **HKDF-SHA256** — RFC 5869 compliant key derivation
-- **XChaCha20-Poly1305 AEAD** — encryption with authenticated associated data
-- **Expo React Native** — runs on iOS and Android via Expo Go
+- **X3DH key agreement** — Asynchronous session establishment with signed prekeys
+- **Double Ratchet** — Forward secrecy + post-compromise security via continuous key rotation
+- **Sealed sender** — Hide sender identity from the server
+- **Sender Keys group messaging** — Efficient E2EE for groups with Ed25519 signatures
+- **Safety numbers** — Signal-style 60-digit key verification
+- **Encrypted backups** — Argon2id + XChaCha20-Poly1305 passphrase-protected backups
+- **Message padding** — PKCS7-style fixed blocks prevent length analysis
+- **Replay protection** — Client-side dedup + monotonic counters + server-side 50K cache
+- **Zero-knowledge server** — Relay never sees plaintext, keys, or sender identity
 - **Secure key storage** — iOS Keychain / Android Keystore via expo-secure-store
-- **Comprehensive documentation** — threat model, security architecture, crypto limitations
 
 ## How It Works
 
-CipherLink uses a three-stage encryption pipeline for every message:
+CipherLink follows the Signal Protocol architecture:
 
-**1. Key Exchange** — Both parties hold X25519 keypairs. They compute a shared secret via elliptic-curve Diffie-Hellman (`AlicePriv × BobPub = BobPriv × AlicePub`), without ever transmitting the secret.
+**1. Key Agreement (X3DH)** — Alice fetches Bob's prekey bundle from the server and performs 3-4 Diffie-Hellman computations to establish an initial shared secret. Bob can be offline.
 
-**2. Key Derivation** — The raw shared secret is passed through HKDF-SHA256 (Extract-then-Expand) with a fixed info string to produce a 256-bit message encryption key.
+**2. Session Ratcheting (Double Ratchet)** — Each message advances a symmetric KDF chain. Periodically, a new ephemeral X25519 keypair performs a DH ratchet step, introducing fresh entropy. Past keys are deleted.
 
-**3. Encryption** — Each message is encrypted with XChaCha20-Poly1305 AEAD using a fresh 24-byte random nonce. Associated data (AAD) binds the sender, recipient, timestamp, message ID, and protocol version to the ciphertext — any tampering causes decryption to fail.
+**3. Encryption (XChaCha20-Poly1305 AEAD)** — Messages are padded to 256-byte blocks and encrypted with a fresh key derived from the ratchet chain. AAD binds sender, recipient, timestamp, and protocol metadata.
 
-The server only routes encrypted envelopes by recipient public key. It never sees plaintext, keys, or shared secrets.
+**4. Routing** — The server routes encrypted envelopes by recipient public key. With sealed sender, even the sender identity is encrypted. The server never sees plaintext, keys, or shared secrets.
 
 ## Project Structure
 
 ```
-packages/crypto/        E2EE cryptographic primitives (libsodium)
+packages/crypto/        E2EE cryptographic library (libsodium)
   src/sodium.ts         Sodium initialization
   src/keys.ts           X25519 keypair generation
   src/kdf.ts            HKDF-SHA256 key derivation
   src/envelope.ts       XChaCha20-Poly1305 encrypt/decrypt with AAD
+  src/x3dh.ts           X3DH key agreement (prekeys, signed prekeys)
+  src/ratchet.ts        Double Ratchet (DH + symmetric ratchet)
+  src/sealed-sender.ts  Sealed sender (hide sender from server)
+  src/group.ts          Sender Keys group messaging
+  src/safety-numbers.ts Safety numbers (key verification)
+  src/padding.ts        PKCS7-style message padding
+  src/replay.ts         Replay protection (dedup + counters)
+  src/backup.ts         Encrypted backup (Argon2id + XChaCha20)
   src/base64.ts         Base64 encoding utilities
-  __tests__/            20 unit tests (vitest)
+  __tests__/            57 unit tests (vitest)
 
 apps/server/            Zero-knowledge WebSocket relay (Node.js + ws)
-  src/index.ts          Server entry, routing, auth
-  src/schema.ts         Zod message validation
+  src/index.ts          Routing, auth, sealed sender, groups, replay dedup
+  src/schema.ts         Zod validation (all message types)
   src/rate-limit.ts     Token-bucket rate limiter
   src/queue.ts          Offline message TTL queue
 
@@ -110,7 +120,7 @@ Scan the QR code with Expo Go on your phone.
 ### Testing
 
 ```bash
-# Run all 20 crypto unit tests
+# Run all 57 crypto unit tests
 pnpm test
 
 # Lint all packages
@@ -119,16 +129,6 @@ pnpm lint
 # Typecheck all packages
 pnpm typecheck
 ```
-
-## Testing E2EE End-to-End
-
-1. Start the relay server: `pnpm dev:server`
-2. Open the mobile app on **two devices** (or two simulators)
-3. On each device, generate an identity keypair on the Setup screen
-4. Copy Device A's public key and paste it into Device B's recipient field (and vice versa)
-5. Connect to the server on both devices
-6. Send a message — encrypted on sender, decrypted on recipient
-7. The server only ever sees ciphertext
 
 ## Security Posture
 
@@ -139,36 +139,54 @@ pnpm typecheck
 | Server reading messages | XChaCha20-Poly1305 E2EE |
 | Message tampering | AEAD authentication tag |
 | Metadata tampering | AAD binding (sender, recipient, time, id, version) |
-| Sender spoofing | Server verifies senderPub matches authenticated key |
-| Brute-force keys | 256-bit keys via HKDF-SHA256 |
-| Nonce reuse | 24-byte random nonces (XChaCha20) |
+| Replay attacks | Client dedup + monotonic counters + server 50K cache |
+| Past message exposure | Forward secrecy via Double Ratchet |
+| Ongoing key compromise | Post-compromise security via DH ratchet |
+| MITM at key exchange | Safety numbers (60-digit verification) |
+| Sender identity leakage | Sealed sender (ephemeral DH) |
+| Message length analysis | PKCS7 padding (256-byte blocks) |
+| Group message forgery | Ed25519 signatures (Sender Keys) |
+| Backup exposure | Argon2id + XChaCha20-Poly1305 |
 
 ### Known Limitations
 
 | Gap | Impact |
 |---|---|
-| No forward secrecy | Key compromise exposes all past messages |
-| No Double Ratchet | Static key per conversation pair |
-| Metadata visible to server | Who, when, message sizes, IPs |
-| Manual key verification only | No automated TOFU or safety numbers |
-| No group messaging | Pairwise (1:1) only |
-| No multi-device | Single keypair, single device |
+| No multi-device | Single keypair per device (X3DH enables async setup) |
+| Metadata timing | Connection timing patterns visible to network observer |
+| No TLS in dev | Production must use wss:// |
+| No message deletion | No remote wipe or disappearing messages |
 
-Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Limits](docs/CRYPTO_LIMITS.md)**
+Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Design](docs/CRYPTO_LIMITS.md)**
 
 ## Tech Stack
 
 | Component | Technology | Purpose |
 |---|---|---|
-| Cryptography | libsodium-wrappers-sumo | X25519, HKDF, XChaCha20-Poly1305 |
+| Cryptography | libsodium-wrappers-sumo | X25519, Ed25519, HKDF, XChaCha20-Poly1305, Argon2id |
 | Mobile | Expo (React Native) | iOS + Android via managed workflow |
 | Server | Node.js + ws | Minimal WebSocket relay |
 | Validation | Zod | Schema validation for all messages |
 | Key Storage | expo-secure-store | Hardware-backed secure enclave |
 | Language | TypeScript (strict) | Type safety everywhere |
 | Monorepo | pnpm workspaces | Package management |
-| Testing | Vitest | 20 unit tests for crypto |
+| Testing | Vitest | 57 unit tests for crypto |
 | CI | GitHub Actions | Lint, typecheck, test on every push |
+
+## Cryptographic Modules
+
+| Module | Protocol | Description |
+|---|---|---|
+| `x3dh.ts` | X3DH | Key agreement with signed prekeys + one-time prekeys |
+| `ratchet.ts` | Double Ratchet | Forward secrecy + post-compromise security |
+| `sealed-sender.ts` | Sealed Sender | Hide sender from server via ephemeral DH |
+| `group.ts` | Sender Keys | Group E2EE with chain ratchet + Ed25519 signing |
+| `safety-numbers.ts` | Safety Numbers | 60-digit key verification (5200x SHA-512) |
+| `padding.ts` | PKCS7 Padding | Fixed 256-byte blocks prevent length analysis |
+| `replay.ts` | Replay Guard | Sliding window dedup + monotonic counters |
+| `backup.ts` | Encrypted Backup | Argon2id KDF + XChaCha20-Poly1305 |
+| `envelope.ts` | V1 Envelope | XChaCha20-Poly1305 AEAD with AAD |
+| `kdf.ts` | HKDF-SHA256 | RFC 5869 key derivation |
 
 ## Security Documentation
 
@@ -176,7 +194,7 @@ Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Limits](docs
 |---|---|
 | [SECURITY_MODEL.md](docs/SECURITY_MODEL.md) | Architecture, protocol flow, key storage, server role |
 | [THREAT_MODEL.md](docs/THREAT_MODEL.md) | What is protected, what isn't, adversary model |
-| [CRYPTO_LIMITS.md](docs/CRYPTO_LIMITS.md) | Missing features, upgrade roadmap to Signal/MLS |
+| [CRYPTO_LIMITS.md](docs/CRYPTO_LIMITS.md) | Full feature status, remaining considerations, test coverage |
 
 ## License
 

@@ -4,10 +4,11 @@
  *
  * @author Belkis Aslani
  */
-import type { Envelope } from "./schema.js";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type QueueableMessage = Record<string, any>;
 
 interface QueuedMessage {
-  envelope: Envelope;
+  envelope: QueueableMessage;
   expiresAt: number;
 }
 
@@ -26,7 +27,7 @@ export class OfflineQueue {
   /**
    * Enqueue a message for an offline recipient.
    */
-  enqueue(recipientPub: string, envelope: Envelope): void {
+  enqueue(recipientPub: string, envelope: QueueableMessage): void {
     let queue = this.queues.get(recipientPub);
     if (!queue) {
       queue = [];
@@ -47,7 +48,7 @@ export class OfflineQueue {
   /**
    * Drain all queued messages for a recipient.
    */
-  drain(recipientPub: string): Envelope[] {
+  drain(recipientPub: string): QueueableMessage[] {
     const queue = this.queues.get(recipientPub);
     if (!queue) return [];
 

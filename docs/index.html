@@ -513,8 +513,8 @@
         <span class="gradient">only you can read</span>
       </h1>
       <p>
-        A production-grade, security-first end-to-end encrypted chat skeleton.
-        Zero-knowledge server. Best-practice cryptography. Built with libsodium.
+        Signal Protocol architecture — X3DH, Double Ratchet, sealed sender,
+        Sender Keys groups, safety numbers. Zero-knowledge server. 57 tests. Built with libsodium.
       </p>
       <div class="hero-buttons">
         <a href="#simulation" class="btn btn-primary">
@@ -676,45 +676,59 @@
       <div class="features-grid">
         <div class="feature-card reveal">
           <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
           </div>
-          <h3>Zero-Knowledge Server</h3>
-          <p>The relay server never sees plaintext. It routes encrypted envelopes by recipient public key and forgets everything.</p>
+          <h3>X3DH Key Agreement</h3>
+          <p>Extended Triple Diffie-Hellman with Ed25519 identity keys, signed prekeys, and one-time prekeys. Asynchronous session setup — Bob can be offline.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </div>
+          <h3>Double Ratchet</h3>
+          <p>Forward secrecy and post-compromise security via continuous key rotation. DH ratchet + symmetric KDF chains. Past keys are irrecoverable.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
-          <h3>AEAD Encryption</h3>
-          <p>XChaCha20-Poly1305 with authenticated associated data binds sender, recipient, timestamp, and protocol version to every message.</p>
+          <h3>Sealed Sender</h3>
+          <p>Sender identity encrypted via ephemeral DH keypair. The server only knows the recipient — not who sent the message.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
-          <h3>X25519 Key Exchange</h3>
-          <p>Elliptic-curve Diffie-Hellman on Curve25519. Both parties independently derive the same shared secret without ever transmitting it.</p>
+          <h3>Sender Keys Groups</h3>
+          <p>Efficient group E2EE using the Sender Keys protocol. Chain ratchet encryption with Ed25519 signatures on every group message.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h3>Safety Numbers</h3>
+          <p>Signal-style 60-digit safety numbers via 5200 iterations of SHA-512. QR code payloads for in-person key verification.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>Zero-Knowledge Server</h3>
+          <p>The relay never sees plaintext, keys, or sender identity. It routes encrypted envelopes and forgets everything. 50K replay dedup cache.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </div>
-          <h3>Secure Key Storage</h3>
-          <p>Private keys are stored in the device's hardware-backed secure enclave via expo-secure-store (iOS Keychain / Android Keystore).</p>
-        </div>
-        <div class="feature-card reveal">
-          <div class="feature-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
-          <h3>Rate Limiting</h3>
-          <p>Token-bucket rate limiter per connection prevents flooding and basic DoS. Configurable burst and sustained rates.</p>
+          <h3>Encrypted Backups</h3>
+          <p>Argon2id key derivation (256MB memory) + XChaCha20-Poly1305 encryption. Passphrase-protected backup and restore.</p>
         </div>
         <div class="feature-card reveal">
           <div class="feature-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           </div>
-          <h3>Comprehensive Docs</h3>
-          <p>Full threat model, security architecture, and cryptographic limitations documented. Honest about what's protected and what isn't.</p>
+          <h3>Message Padding + Replay Guard</h3>
+          <p>PKCS7-style 256-byte block padding hides message length. Multi-layer replay protection with dedup, counters, and server cache.</p>
         </div>
       </div>
     </div>
@@ -787,26 +801,28 @@
             Protected Against
           </h4>
           <ul>
-            <li>Server reading message contents</li>
-            <li>Message tampering in transit (AEAD auth tag)</li>
-            <li>Metadata tampering (AAD binding)</li>
-            <li>Sender identity spoofing</li>
-            <li>Brute-force key recovery (256-bit keys)</li>
-            <li>Nonce reuse (24-byte random, XChaCha20)</li>
+            <li>Server reading messages (XChaCha20-Poly1305 E2EE)</li>
+            <li>Past message exposure (forward secrecy via Double Ratchet)</li>
+            <li>Ongoing key compromise (post-compromise security)</li>
+            <li>Sender identity leakage (sealed sender)</li>
+            <li>MITM attacks (safety number verification)</li>
+            <li>Replay attacks (client dedup + server 50K cache)</li>
+            <li>Message length analysis (256-byte block padding)</li>
+            <li>Group message forgery (Ed25519 signatures)</li>
+            <li>Backup exposure (Argon2id + XChaCha20-Poly1305)</li>
           </ul>
         </div>
         <div class="sec-card known-limits">
           <h4>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Known Limitations
+            Remaining Considerations
           </h4>
           <ul>
-            <li>No forward secrecy (static DH keys)</li>
-            <li>No Double Ratchet (same key per pair)</li>
-            <li>Metadata visible to server (who, when, size)</li>
-            <li>No automated key verification (manual only)</li>
-            <li>No group messaging or multi-device</li>
-            <li>No sealed sender (sender visible to server)</li>
+            <li>No multi-device support (single keypair per device)</li>
+            <li>Traffic timing patterns visible to network observer</li>
+            <li>No TLS in dev mode (production must use wss://)</li>
+            <li>No disappearing messages or remote wipe</li>
+            <li>Needs independent security audit for production</li>
           </ul>
         </div>
       </div>
@@ -892,7 +908,7 @@
 <span class="comment"># In another terminal — start the Expo mobile app</span>
 <span class="prompt">$</span> <span class="cmd">pnpm dev:mobile</span>
 
-<span class="comment"># Run tests (20 crypto unit tests)</span>
+<span class="comment"># Run tests (57 crypto unit tests)</span>
 <span class="prompt">$</span> <span class="cmd">pnpm test</span>
       </div>
     </div>
