@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "CipherLink",
+    "slug": "cipherlink",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "cipherlink",
+    "platforms": ["ios", "android"],
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cipherlink.app"
+    },
+    "android": {
+      "package": "com.cipherlink.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#1a1a2e"
+      }
+    }
+  }
+}

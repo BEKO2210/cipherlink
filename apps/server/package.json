@@ -1,0 +1,29 @@
+{
+  "name": "@cipherlink/server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zero-knowledge WebSocket relay for CipherLink — by Belkis Aslani",
+  "author": "Belkis Aslani",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.12",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0",
+    "tsx": "^4.16.0",
+    "eslint": "^9.0.0",
+    "typescript-eslint": "^8.0.0",
+    "@eslint/js": "^9.0.0"
+  }
+}

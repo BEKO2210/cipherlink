@@ -1,0 +1,22 @@
+{
+  "name": "cipherlink",
+  "version": "0.1.0",
+  "private": true,
+  "description": "End-to-end encrypted chat app skeleton — by Belkis Aslani",
+  "author": "Belkis Aslani",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev:server": "pnpm --filter @cipherlink/server dev",
+    "dev:mobile": "pnpm --filter @cipherlink/mobile start",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\""
+  }
+}
