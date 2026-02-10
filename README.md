@@ -15,7 +15,7 @@
 
 <br />
 
-A security-first E2EE chat implementing the **Signal Protocol** with **v2 security hardening** — post-quantum hybrid KEM, MLS-inspired TreeKEM groups, metadata resistance, key transparency, Shamir key splitting, cryptographic agility, and formal protocol state machines. Zero-knowledge server. 156 passing tests.
+A security-first E2EE chat implementing the **Signal Protocol** with **v3 production hardening** — post-quantum hybrid KEM, MLS-inspired TreeKEM groups, metadata resistance, key transparency, Shamir key splitting, TLS enforcement, audit-ready security documentation. Zero-knowledge server. 156 passing tests.
 
 [Live Demo](https://beko2210.github.io/cipherlink/) · [Security Model](docs/SECURITY_MODEL.md) · [Threat Model](docs/THREAT_MODEL.md) · [Crypto Design](docs/CRYPTO_LIMITS.md) · [v2 Architecture](docs/SECURITY_ARCHITECTURE_V2.md) · [Audit Pack](docs/audit/)
 
@@ -30,7 +30,7 @@ A security-first E2EE chat implementing the **Signal Protocol** with **v2 securi
 
 ## Overview
 
-CipherLink implements a complete Signal Protocol-based E2EE architecture with v2 security hardening:
+CipherLink implements a complete Signal Protocol-based E2EE architecture with v3 production hardening:
 
 ### v1 Core Protocol
 - **X3DH key agreement** — Asynchronous session establishment with signed prekeys
@@ -53,6 +53,15 @@ CipherLink implements a complete Signal Protocol-based E2EE architecture with v2
 - **Key Splitting** — Shamir's Secret Sharing (2-of-3) for backup key recovery
 - **SecureBuffer** — Misuse-resistant key handling with use-after-wipe detection
 - **Protocol State Machine** — Formal session lifecycle with invariant enforcement
+
+### v3 Production Hardening
+- **TLS Enforcement** — Production guard blocks ws://; mandatory wss:// with configurable cert paths
+- **Server Hardening** — IP-based connection limiting, ping/pong keepalive, group fan-out cap (256)
+- **Sanitized Logging** — Structured logging with level filtering; no secrets, keys, or ciphertext in logs
+- **Dependency Hygiene** — Dependabot, lockfile integrity checks in CI, SBOM generation
+- **Audit-Ready Docs** — Threat model (9 adversary classes), attack surface review, protocol state spec, 34 security claims mapped to code/tests
+- **Testing Upgrade** — 156 tests: unit, property-based (fast-check), fuzz, adversarial
+- **SECURITY.md** — Responsible disclosure policy with severity classification and response timeline
 
 ## How It Works
 
@@ -96,7 +105,8 @@ packages/crypto/             E2EE cryptographic library (libsodium)
   __tests__/                 156 tests (vitest) — unit, property-based, fuzz, adversarial
 
 apps/server/            Zero-knowledge WebSocket relay (Node.js + ws)
-  src/index.ts          Routing, auth, sealed sender, groups, replay dedup
+  src/index.ts          Routing, auth, sealed sender, groups, replay dedup, TLS
+  src/config.ts         Server config with TLS enforcement + secure defaults
   src/schema.ts         Zod validation (all message types)
   src/rate-limit.ts     Token-bucket rate limiter
   src/queue.ts          Offline message TTL queue
@@ -175,16 +185,21 @@ pnpm typecheck
 | Key material misuse | SecureBuffer with use-after-wipe detection |
 | Protocol state confusion | Formal state machine with invariant enforcement |
 | Group scalability | TreeKEM with O(log n) update complexity |
+| Insecure transport | TLS enforcement in production (ws:// blocked) |
+| Connection flooding | IP-based connection limiting + ping/pong keepalive |
+| Log data leakage | Sanitized structured logging (no secrets/keys/ciphertext) |
+| Dependency supply chain | Dependabot + lockfile integrity checks + SBOM |
 
 ### Known Limitations
 
 | Gap | Impact |
 |---|---|
-| No multi-device | Single keypair per device (X3DH enables async setup) |
+| No multi-device yet | Design doc complete; implementation pending ([MULTI_DEVICE.md](docs/design/MULTI_DEVICE.md)) |
 | Metadata timing | Mitigated by cover traffic; full mixnet not implemented |
-| No TLS in dev | Production must use wss:// |
+| No server tests | Server relay lacks integration test coverage |
 | No message deletion | No remote wipe or disappearing messages |
 | PQ KEM placeholder | ML-KEM-768 wire format ready; uses X25519 internally until native Kyber available |
+| Needs external audit | Independent security review recommended before high-risk production use |
 
 Full details: **[Threat Model](docs/THREAT_MODEL.md)** · **[Crypto Design](docs/CRYPTO_LIMITS.md)**
 
