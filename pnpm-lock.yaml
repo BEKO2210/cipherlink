@@ -23,8 +23,8 @@ importers:
         specifier: ~15.0.8
         version: 15.0.8(expo@52.0.49(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@expo/metro-runtime@4.0.1(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4)))(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4))(react@19.2.4))
       expo-status-bar:
-        specifier: ~2.0.0
-        version: 2.0.1(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4))(react@19.2.4)
+        specifier: ~3.0.9
+        version: 3.0.9(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4))(react@19.2.4)
       libsodium-wrappers-sumo:
         specifier: ^0.7.15
         version: 0.7.16
@@ -2829,8 +2829,8 @@ packages:
     resolution: {integrity: sha512-IGR++flYH70rhLyeXF0Phle56/k4cee87WeQ4mamS+MkVAVP+dDlOHf2nN06Z9Y2KhU0Gp1k+y61KkghF7HdhA==}
     engines: {node: '>=20.16.0'}
 
-  expo-status-bar@2.0.1:
-    resolution: {integrity: sha512-AkIPX7jWHRPp83UBZ1iXtVvyr0g+DgBVvIXTtlmPtmUsm8Vq9Bb5IGj86PW8osuFlgoTVAg7HI/+Ok7yEYwiRg==}
+  expo-status-bar@3.0.9:
+    resolution: {integrity: sha512-xyYyVg6V1/SSOZWh4Ni3U129XHCnFHBTcUo0dhWtFDrZbNp/duw5AGsQfb2sVeU0gxWHXSY1+5F0jnKYC7WuOw==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -8049,10 +8049,11 @@ snapshots:
 
   expo-server@1.0.5: {}
 
-  expo-status-bar@2.0.1(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4))(react@19.2.4):
+  expo-status-bar@3.0.9(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4))(react@19.2.4):
     dependencies:
       react: 19.2.4
       react-native: 0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4)
+      react-native-is-edge-to-edge: 1.2.1(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4))(react@19.2.4)
 
   expo@52.0.49(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@expo/metro-runtime@4.0.1(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4)))(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@19.2.13)(react@19.2.4))(react@19.2.4):
     dependencies:
