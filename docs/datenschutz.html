@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CipherLink — Datenschutzerklarung</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/logo-192.png" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #0a0a1a; --bg-secondary: #111127; --bg-card: #16163a;
+      --accent: #e94560; --accent-glow: rgba(233,69,96,.35);
+      --text: #eaeaea; --text-muted: #8888aa; --text-dim: #555577;
+      --success: #4caf50; --warning: #f5a623;
+      --radius: 16px; --radius-sm: 10px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg-primary); color: var(--text); line-height: 1.8; min-height: 100vh; }
+    a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
+    a:hover { opacity: .8; }
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(233,69,96,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(233,69,96,.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px; background: rgba(10,10,26,.92);
+      backdrop-filter: blur(20px); border-bottom: 1px solid rgba(233,69,96,.1);
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { color: var(--text-muted); font-size: .9rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--text); opacity: 1; }
+    .container { max-width: 800px; margin: 0 auto; padding: 60px 24px 80px; position: relative; z-index: 1; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-muted); font-size: .85rem; margin-bottom: 32px;
+    }
+    .back-link:hover { color: var(--text); opacity: 1; }
+    h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
+    h1 .gradient {
+      background: linear-gradient(135deg, var(--accent) 0%, #ff6b8a 50%, #c23152 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .subtitle { color: var(--text-muted); font-size: .9rem; margin-bottom: 40px; }
+    .legal-section { margin-bottom: 36px; }
+    .legal-section h2 {
+      font-size: 1.1rem; font-weight: 700; color: var(--accent);
+      margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 1px solid rgba(233,69,96,.15);
+    }
+    .legal-section h3 {
+      font-size: .95rem; font-weight: 600; color: var(--text);
+      margin: 16px 0 8px;
+    }
+    .legal-section p, .legal-section li { color: var(--text-muted); font-size: .92rem; margin-bottom: 8px; }
+    .legal-section ul { list-style: none; padding: 0; }
+    .legal-section ul li { padding-left: 16px; position: relative; }
+    .legal-section ul li::before {
+      content: ''; position: absolute; left: 0; top: 10px;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    }
+    .zk-box {
+      background: rgba(76,175,80,.06); border: 1px solid rgba(76,175,80,.2);
+      border-left: 3px solid var(--success); border-radius: var(--radius-sm);
+      padding: 20px 24px; margin: 20px 0;
+    }
+    .zk-box .label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--success); margin-bottom: 8px; }
+    .zk-box p { color: var(--text-muted); font-size: .88rem; margin-bottom: 4px; }
+    .warning-box {
+      background: rgba(245,166,35,.06); border: 1px solid rgba(245,166,35,.2);
+      border-left: 3px solid var(--warning); border-radius: var(--radius-sm);
+      padding: 20px 24px; margin: 20px 0;
+    }
+    .warning-box .label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--warning); margin-bottom: 8px; }
+    .warning-box p { color: var(--text-muted); font-size: .88rem; margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    th, td {
+      padding: 10px 14px; text-align: left; font-size: .85rem;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    th { color: var(--accent); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
+    td { color: var(--text-muted); }
+    footer {
+      border-top: 1px solid rgba(255,255,255,.05); padding: 40px 24px;
+      text-align: center; position: relative; z-index: 1;
+    }
+    footer p { color: var(--text-dim); font-size: .85rem; }
+    footer .author { color: var(--accent); font-weight: 600; }
+    .footer-links { margin-top: 12px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .footer-links a { color: var(--text-muted); font-size: .8rem; }
+    @media (max-width: 768px) {
+      nav { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .container { padding: 40px 16px 60px; }
+      h1 { font-size: 1.6rem; }
+      table { font-size: .8rem; }
+      th, td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <nav>
+    <div class="nav-logo">
+      <img src="assets/logo-192.png" alt="CipherLink" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;border-radius:6px;" />
+      <span>Cipher</span>Link
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="impressum.html">Impressum</a></li>
+      <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <a href="index.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Zuruck zur Startseite
+    </a>
+
+    <h1><span class="gradient">Datenschutzerklarung</span></h1>
+    <p class="subtitle">Gemaß Art. 13, 14 DSGVO | Stand: Februar 2026</p>
+
+    <div class="legal-section">
+      <h2>1. Verantwortlicher</h2>
+      <p>
+        Verantwortlich fur die Datenverarbeitung auf dieser Website ist:<br>
+        <strong>Belkis Aslani</strong><br>
+        [Adresse bitte eintragen]<br>
+        E-Mail: [E-Mail-Adresse bitte eintragen]
+      </p>
+    </div>
+
+    <div class="legal-section">
+      <h2>2. Zero-Knowledge-Architektur</h2>
+      <div class="zk-box">
+        <div class="label">Designprinzip: Zero Knowledge</div>
+        <p>
+          CipherLink ist als Zero-Knowledge-System konzipiert. Der Relay-Server kann
+          <strong>keine Nachrichteninhalte, Schlussel oder Absenderidentitaten</strong> einsehen.
+          Alle Nachrichten werden clientseitig Ende-zu-Ende verschlusselt (XChaCha20-Poly1305),
+          bevor sie das Gerat verlassen.
+        </p>
+      </div>
+      <div class="warning-box">
+        <div class="label">Transparenzhinweis: Metadaten</div>
+        <p>
+          Trotz Zero-Knowledge-Architektur verarbeitet der Server zwangslaufig bestimmte
+          <strong>technische Metadaten</strong>, die fur die Zustellung von Nachrichten erforderlich sind.
+          Diese werden im Folgenden transparent dokumentiert.
+        </p>
+      </div>
+    </div>
+
+    <div class="legal-section">
+      <h2>3. Datenverarbeitung auf der Website</h2>
+      <h3>3.1 GitHub Pages Hosting</h3>
+      <p>
+        Diese Website wird uber <strong>GitHub Pages</strong> (GitHub Inc., USA) gehostet.
+        Beim Aufruf der Website werden automatisch technische Daten durch GitHub erfasst:
+      </p>
+      <ul>
+        <li>IP-Adresse des Besuchers</li>
+        <li>Datum und Uhrzeit des Zugriffs</li>
+        <li>Aufgerufene Seite / URL</li>
+        <li>Verwendeter Browser und Betriebssystem</li>
+        <li>Referrer-URL</li>
+      </ul>
+      <p>
+        Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Bereitstellung der Website).
+        Weitere Informationen: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub Privacy Statement</a>.
+      </p>
+
+      <h3>3.2 Keine Cookies, kein Tracking</h3>
+      <p>
+        Diese Website verwendet <strong>keine Cookies, kein Tracking, keine Analytics-Dienste</strong>
+        und keine Drittanbieter-Skripte. Es werden keine Benutzerprofile erstellt.
+      </p>
+    </div>
+
+    <div class="legal-section">
+      <h2>4. Datenverarbeitung durch den CipherLink-Server</h2>
+      <p>
+        Wenn Sie die CipherLink-App nutzen (nicht die Website), verarbeitet der Relay-Server
+        folgende Daten fur die Nachrichtenzustellung:
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Zweck</th>
+            <th>Speicherdauer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>IP-Adresse</td>
+            <td>Verbindungsaufbau, Rate-Limiting, IP-basierte Verbindungslimitierung</td>
+            <td>Nur wahrend der aktiven Verbindung</td>
+          </tr>
+          <tr>
+            <td>Offentlicher Schlussel (Empfanger)</td>
+            <td>Zustellung verschlusselter Umschlage</td>
+            <td>Nur wahrend der aktiven Sitzung</td>
+          </tr>
+          <tr>
+            <td>Verschlusselter Umschlag (Ciphertext)</td>
+            <td>Weiterleitung an den Empfanger</td>
+            <td>Max. 10 Min. (Offline-Warteschlange, max. 100 pro Empfanger)</td>
+          </tr>
+          <tr>
+            <td>Nachrichten-IDs</td>
+            <td>Replay-Schutz (Deduplizierung)</td>
+            <td>50.000 IDs im Sliding Window</td>
+          </tr>
+          <tr>
+            <td>Verbindungs-Zeitstempel</td>
+            <td>Keepalive (Ping/Pong), Erkennung veralteter Verbindungen</td>
+            <td>Nur wahrend der aktiven Verbindung</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="zk-box">
+        <div class="label">Was der Server NICHT sieht</div>
+        <p>Nachrichteninhalte (Klartext)</p>
+        <p>Kryptographische Schlussel (privat oder geteilt)</p>
+        <p>Absenderidentitat (Sealed Sender)</p>
+        <p>Kontaktlisten oder Gruppenmetadaten</p>
+        <p>Nachrichtenlangen (einheitliche 4096-Byte-Umschlage)</p>
+      </div>
+    </div>
+
+    <div class="legal-section">
+      <h2>5. Schutzmaßnahmen</h2>
+      <ul>
+        <li><strong>TLS-Durchsetzung:</strong> In Produktionsumgebungen werden ausschließlich wss://-Verbindungen akzeptiert</li>
+        <li><strong>Bereinigte Protokollierung:</strong> Server-Logs enthalten keine Schlussel, Klartext oder Ciphertext</li>
+        <li><strong>IP-Rate-Limiting:</strong> Token-Bucket-Verfahren (30 Burst, 5/Sekunde) schutzt vor Missbrauch</li>
+        <li><strong>Verbindungslimitierung:</strong> Maximale Verbindungen pro IP-Adresse konfigurierbar</li>
+        <li><strong>Keine persistente Speicherung:</strong> Alle Daten werden nur im Arbeitsspeicher gehalten</li>
+      </ul>
+    </div>
+
+    <div class="legal-section">
+      <h2>6. Drittlandubermittlung</h2>
+      <p>
+        Da GitHub Pages (USA) als Hosting-Dienst verwendet wird, konnen personenbezogene Daten
+        (IP-Adresse) in die USA ubermittelt werden. GitHub unterliegt dem EU-U.S. Data Privacy Framework.
+        Der CipherLink Relay-Server kann selbst gehostet werden — in diesem Fall erfolgt keine
+        Drittlandubermittlung.
+      </p>
+    </div>
+
+    <div class="legal-section">
+      <h2>7. Ihre Rechte</h2>
+      <p>Gemaß DSGVO haben Sie folgende Rechte:</p>
+      <ul>
+        <li><strong>Auskunftsrecht</strong> (Art. 15 DSGVO) — Welche Daten uber Sie verarbeitet werden</li>
+        <li><strong>Berichtigungsrecht</strong> (Art. 16 DSGVO) — Korrektur unrichtiger Daten</li>
+        <li><strong>Loschungsrecht</strong> (Art. 17 DSGVO) — Loschung Ihrer Daten</li>
+        <li><strong>Einschrankung der Verarbeitung</strong> (Art. 18 DSGVO)</li>
+        <li><strong>Datenubertragbarkeit</strong> (Art. 20 DSGVO)</li>
+        <li><strong>Widerspruchsrecht</strong> (Art. 21 DSGVO)</li>
+      </ul>
+      <p>
+        Zur Ausubung Ihrer Rechte wenden Sie sich bitte an die unter Punkt 1 genannte Kontaktadresse.
+        Sie haben zudem das Recht, sich bei einer Datenschutz-Aufsichtsbehorde zu beschweren.
+      </p>
+    </div>
+
+    <div class="legal-section">
+      <h2>8. Open-Source-Transparenz</h2>
+      <p>
+        Der gesamte Quellcode von CipherLink — einschließlich Server, Kryptographie-Bibliothek und
+        Mobile-App — ist offentlich einsehbar auf
+        <a href="https://github.com/BEKO2210/cipherlink" target="_blank" rel="noopener">GitHub</a>.
+        Jeder kann die Datenschutzaussagen durch Codeinsicht verifizieren. Die
+        <a href="audit/">Audit-Dokumentation</a> enthalt ein vollstandiges Bedrohungsmodell,
+        Angriffsflachenanalyse und 34 Sicherheitsaussagen mit Code-Referenzen.
+      </p>
+    </div>
+
+    <div class="legal-section">
+      <h2>9. Anderungen</h2>
+      <p>
+        Diese Datenschutzerklarung kann bei Weiterentwicklung des Projekts aktualisiert werden.
+        Die aktuelle Version ist stets unter dieser URL verfugbar. Letzte Aktualisierung: Februar 2026.
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    <p><span class="author">CipherLink</span> &mdash; von <span class="author">Belkis Aslani</span></p>
+    <div class="footer-links">
+      <a href="index.html">Startseite</a>
+      <a href="impressum.html">Impressum</a>
+      <a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>
