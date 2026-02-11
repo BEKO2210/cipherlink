@@ -320,6 +320,53 @@
       0%, 100% { opacity: 1; } 50% { opacity: 0; }
     }
 
+    /* ===== SIMULATION POPUPS ===== */
+    .sim-progress {
+      display: flex; gap: 8px; justify-content: center; margin-bottom: 24px;
+    }
+    .sim-progress-step {
+      width: 48px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,.08);
+      transition: all .5s ease;
+    }
+    .sim-progress-step.active {
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .sim-progress-step.done {
+      background: var(--success);
+    }
+    .sim-popup {
+      background: linear-gradient(135deg, rgba(233,69,96,.08), rgba(15,52,96,.15));
+      border: 1px solid rgba(233,69,96,.2);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      margin: 0 0 16px 0;
+      font-size: .88rem;
+      line-height: 1.65;
+      color: var(--text);
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: all .6s cubic-bezier(.4, 0, .2, 1);
+    }
+    .sim-popup.visible {
+      opacity: 1;
+      max-height: 200px;
+      margin: 0 0 16px 0;
+    }
+    .sim-popup .popup-header {
+      font-weight: 700;
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sim-popup .popup-header svg { flex-shrink: 0; }
+
     /* ===== FEATURE CARDS ===== */
     .features-section { padding: 100px 0; }
     .features-grid {
@@ -614,6 +661,25 @@
           <button class="btn btn-outline" id="simReset" style="font-family:var(--font);display:none;">
             Reset Demo
           </button>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="sim-progress" id="simProgress">
+          <div class="sim-progress-step" data-step="1"></div>
+          <div class="sim-progress-step" data-step="2"></div>
+          <div class="sim-progress-step" data-step="3"></div>
+          <div class="sim-progress-step" data-step="4"></div>
+          <div class="sim-progress-step" data-step="5"></div>
+          <div class="sim-progress-step" data-step="6"></div>
+        </div>
+
+        <!-- Popup explanation -->
+        <div class="sim-popup" id="simPopup">
+          <div class="popup-header">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span id="simPopupTitle">What's happening</span>
+          </div>
+          <div id="simPopupText"></div>
         </div>
 
         <div class="sim-stages" id="simStages">
@@ -1102,7 +1168,7 @@
 <span class="comment"># In another terminal — start the Expo mobile app</span>
 <span class="prompt">$</span> <span class="cmd">pnpm dev:mobile</span>
 
-<span class="comment"># Run all 156 tests (57 v1 + 63 v2 + 36 v3 hardening)</span>
+<span class="comment"># Run all 156 tests (20 v1 + 63 v2 + 36 v3 + 37 advanced)</span>
 <span class="prompt">$</span> <span class="cmd">pnpm test</span>
       </div>
     </div>
@@ -1173,6 +1239,15 @@
     /* ===== E2EE Simulation ===== */
     const MESSAGE = "Hey Bob, let's meet at the park at 3pm!";
 
+    const POPUPS = {
+      1: { title: "Step 1 — Compose Message", text: "Alice types her plaintext message. Right now only she can see it. This message will never leave her device unencrypted." },
+      2: { title: "Step 2 — Key Exchange (X25519 Diffie-Hellman)", text: "Alice and Bob perform an X25519 Diffie-Hellman key exchange. Each side contributes an ephemeral public key. Together they derive a shared secret that neither the server nor any observer can compute." },
+      3: { title: "Step 3 — Key Derivation (HKDF-SHA256)", text: "The shared secret is passed through HKDF-SHA256 (a Key Derivation Function) to create a unique 256-bit message key. Each message gets a different key — this is how forward secrecy works." },
+      4: { title: "Step 4 — Encryption (XChaCha20-Poly1305 AEAD)", text: "The plaintext is encrypted using XChaCha20-Poly1305 with a random 24-byte nonce. The AEAD auth tag prevents tampering. Additional Authenticated Data (AAD) binds metadata (sender, recipient, timestamp) to the ciphertext." },
+      5: { title: "Step 5 — Zero-Knowledge Server Relay", text: "The relay server receives the encrypted envelope via wss:// (TLS). It can see the ciphertext but CANNOT decrypt it — it has no keys. It routes the envelope to Bob using only the recipient's public key, then forgets everything." },
+      6: { title: "Step 6 — Decryption (Bob's Device)", text: "Bob receives the encrypted envelope, derives the same shared secret using his private key, and decrypts the message with XChaCha20-Poly1305. The auth tag is verified — any tampering would cause decryption to fail. Only Bob can read this." }
+    };
+
     function randomHex(len) {
       const chars = '0123456789abcdef';
       let s = '';
@@ -1180,7 +1255,7 @@
       return s;
     }
 
-    function typeText(el, text, speed = 30) {
+    function typeText(el, text, speed = 45) {
       return new Promise(resolve => {
         el.textContent = '';
         let i = 0;
@@ -1209,6 +1284,29 @@
       }
     }
 
+    function showPopup(step) {
+      const popup = document.getElementById('simPopup');
+      const title = document.getElementById('simPopupTitle');
+      const text = document.getElementById('simPopupText');
+      const info = POPUPS[step];
+      if (!info) return;
+      popup.classList.remove('visible');
+      void popup.offsetHeight;
+      title.textContent = info.title;
+      text.textContent = info.text;
+      popup.classList.add('visible');
+      popup.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function updateProgress(step, status) {
+      const el = document.querySelector(`.sim-progress-step[data-step="${step}"]`);
+      if (el) {
+        el.classList.remove('active', 'done');
+        if (status === 'active') el.classList.add('active');
+        if (status === 'done') el.classList.add('done');
+      }
+    }
+
     async function delay(ms) {
       return new Promise(r => setTimeout(r, ms));
     }
@@ -1230,57 +1328,88 @@
       const nonce = randomHex(12) + '...';
       const ciphertext = randomHex(32) + '...';
 
-      // Stage 1 — Plaintext
+      // Stage 1 — Compose
+      updateProgress(1, 'active');
+      showPopup(1);
+      await delay(1500);
       showStage(1);
       document.getElementById('alicePlain').classList.add('active');
-      await typeText(document.getElementById('alicePlainText'), 'Composing message...');
-      await delay(300);
-      await typeText(document.getElementById('plainMsg'), MESSAGE);
-      await delay(500);
+      await typeText(document.getElementById('alicePlainText'), 'Composing message...', 50);
+      await delay(600);
+      await typeText(document.getElementById('plainMsg'), MESSAGE, 45);
+      updateProgress(1, 'done');
+      await delay(1200);
 
       // Stage 2 — Key Exchange
+      updateProgress(2, 'active');
+      showPopup(2);
+      await delay(1800);
       showStage(2);
-      await delay(200);
-      await typeText(document.getElementById('aliceKeyText'), 'Alice: ' + alicePub + '\nBob:   ' + bobPub, 20);
-      await delay(300);
-      await typeText(document.getElementById('sharedSecretText'), sharedSecret, 25);
-      await delay(500);
+      await delay(400);
+      await typeText(document.getElementById('aliceKeyText'), 'Alice: ' + alicePub + '\nBob:   ' + bobPub, 35);
+      await delay(800);
+      await typeText(document.getElementById('sharedSecretText'), sharedSecret, 40);
+      updateProgress(2, 'done');
+      await delay(1200);
 
       // Stage 3 — KDF
+      updateProgress(3, 'active');
+      showPopup(3);
+      await delay(1800);
       showStage(3);
-      await delay(200);
-      await typeText(document.getElementById('kdfInput'), 'Input: shared_secret\nSalt: 0x00...00\nInfo: "cipherlink-v1-message-key"', 15);
-      await delay(300);
-      await typeText(document.getElementById('msgKeyText'), msgKey, 25);
-      await delay(500);
+      await delay(400);
+      await typeText(document.getElementById('kdfInput'), 'Input: shared_secret\nSalt: 0x00...00\nInfo: "cipherlink-v1-message-key"', 30);
+      await delay(800);
+      await typeText(document.getElementById('msgKeyText'), msgKey, 40);
+      updateProgress(3, 'done');
+      await delay(1200);
 
       // Stage 4 — Encryption
+      updateProgress(4, 'active');
+      showPopup(4);
+      await delay(1800);
       showStage(4);
-      await delay(200);
-      await typeText(document.getElementById('encInput'), 'Key: ' + msgKey + '\nNonce: ' + nonce + '\nAAD: {sender, recipient, ts, id, v1}', 12);
-      await delay(300);
-      await typeText(document.getElementById('cipherText'), ciphertext, 15);
-      await delay(500);
+      await delay(400);
+      await typeText(document.getElementById('encInput'), 'Key: ' + msgKey + '\nNonce: ' + nonce + '\nAAD: {sender, recipient, ts, id, v1}', 25);
+      await delay(800);
+      await typeText(document.getElementById('cipherText'), ciphertext, 30);
+      updateProgress(4, 'done');
+      await delay(1200);
 
       // Stage 5 — Server
+      updateProgress(5, 'active');
+      showPopup(5);
+      await delay(1800);
       showStage(5);
-      await delay(200);
-      await typeText(document.getElementById('serverSees'), '{ v:1, ciphertext:"' + ciphertext.slice(0, 24) + '...", nonce:"' + nonce + '" }', 12);
-      await delay(300);
-      await typeText(document.getElementById('serverKnows'), 'Plaintext? NONE.\nKeys? NONE.\nRole: Route & Forget.', 20);
-      await delay(500);
+      await delay(400);
+      await typeText(document.getElementById('serverSees'), '{ v:1, ciphertext:"' + ciphertext.slice(0, 24) + '...", nonce:"' + nonce + '" }', 25);
+      await delay(800);
+      await typeText(document.getElementById('serverKnows'), 'Plaintext? NONE.\nKeys? NONE.\nSender? HIDDEN (sealed sender).\nRole: Route & Forget.', 35);
+      updateProgress(5, 'done');
+      await delay(1200);
 
       // Stage 6 — Decryption
+      updateProgress(6, 'active');
+      showPopup(6);
+      await delay(1800);
       showStage(6);
-      await delay(200);
-      await typeText(document.getElementById('bobReceived'), 'Received encrypted envelope.\nDeriving shared secret...\nDecrypting with XChaCha20-Poly1305...', 15);
       await delay(400);
-      await typeText(document.getElementById('bobPlain'), MESSAGE, 30);
+      await typeText(document.getElementById('bobReceived'), 'Received encrypted envelope.\nVerifying AEAD auth tag...\nDeriving shared secret...\nDecrypting with XChaCha20-Poly1305...', 30);
+      await delay(1000);
+      await typeText(document.getElementById('bobPlain'), MESSAGE, 50);
+      updateProgress(6, 'done');
+
+      // Hide popup after completion
+      await delay(1500);
+      const popup = document.getElementById('simPopup');
+      popup.classList.remove('visible');
     }
 
     function resetSimulation() {
       document.querySelectorAll('.sim-stage').forEach(s => s.classList.remove('visible'));
       document.querySelectorAll('.sim-device').forEach(d => d.classList.remove('active'));
+      document.querySelectorAll('.sim-progress-step').forEach(s => s.classList.remove('active', 'done'));
+      document.getElementById('simPopup').classList.remove('visible');
       ['alicePlainText','plainMsg','aliceKeyText','sharedSecretText','kdfInput',
        'msgKeyText','encInput','cipherText','serverSees','serverKnows','bobReceived','bobPlain'
       ].forEach(id => {

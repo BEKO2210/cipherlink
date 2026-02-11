@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CipherLink — Audit Pack</title>
+  <meta name="description" content="CipherLink Security Audit Pack: Threat model, attack surface review, protocol state specification, security claims mapping, feature status." />
+  <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+  <link rel="icon" type="image/png" sizes="192x192" href="../assets/logo-192.png" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #0a0a1a;
+      --bg-secondary: #111127;
+      --bg-card: #16163a;
+      --accent: #e94560;
+      --accent-glow: rgba(233, 69, 96, 0.35);
+      --text: #eaeaea;
+      --text-muted: #8888aa;
+      --text-dim: #555577;
+      --success: #4caf50;
+      --warning: #f5a623;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-primary);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
+    a:hover { opacity: .8; }
+
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(233,69,96,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(233,69,96,.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px;
+      background: rgba(10,10,26,.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(233,69,96,.1);
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { color: var(--text-muted); font-size: .9rem; font-weight: 500; transition: color .2s; }
+    .nav-links a:hover { color: var(--text); opacity: 1; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(233,69,96,.1); border: 1px solid rgba(233,69,96,.2);
+      border-radius: 50px; padding: 6px 18px; font-size: .8rem;
+      color: var(--accent); margin-bottom: 24px;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-glow); }
+      50% { opacity: .7; box-shadow: 0 0 0 8px transparent; }
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 900; letter-spacing: -1.5px;
+      line-height: 1.15; margin-bottom: 16px;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--accent) 0%, #ff6b8a 50%, #c23152 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p { color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto; }
+
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 40px 0 80px;
+    }
+    .doc-card {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: all .3s;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .doc-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: var(--accent); transform: scaleX(0);
+      transform-origin: left; transition: transform .4s;
+    }
+    .doc-card:hover::before { transform: scaleX(1); }
+    .doc-card:hover {
+      border-color: rgba(233,69,96,.2);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,.3);
+    }
+    .doc-icon {
+      width: 48px; height: 48px;
+      background: rgba(233,69,96,.1);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 18px;
+    }
+    .doc-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .doc-card p { color: var(--text-muted); font-size: .85rem; line-height: 1.6; flex: 1; }
+    .doc-card .doc-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 16px; font-size: .85rem; font-weight: 600;
+      color: var(--accent);
+    }
+    .doc-card .doc-link svg { transition: transform .2s; }
+    .doc-card:hover .doc-link svg { transform: translateX(4px); }
+
+    .stats-row {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      justify-content: center;
+      padding: 0 0 60px;
+    }
+    .stat {
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius-sm);
+      padding: 20px 28px;
+      text-align: center;
+      min-width: 140px;
+    }
+    .stat .num { font-size: 2rem; font-weight: 900; color: var(--accent); }
+    .stat .label { font-size: .75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-muted); font-size: .85rem;
+      margin-bottom: 20px; transition: color .2s;
+    }
+    .back-link:hover { color: var(--text); opacity: 1; }
+
+    .disclaimer {
+      background: rgba(245,166,35,.08);
+      border: 1px solid rgba(245,166,35,.2);
+      border-left: 3px solid var(--warning);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      margin-bottom: 40px;
+      font-size: .88rem;
+      color: var(--text-muted);
+    }
+    .disclaimer strong { color: var(--warning); }
+
+    footer {
+      border-top: 1px solid rgba(255,255,255,.05);
+      padding: 40px 24px;
+      text-align: center;
+      position: relative; z-index: 1;
+    }
+    footer p { color: var(--text-dim); font-size: .85rem; }
+    footer .author { color: var(--accent); font-weight: 600; }
+
+    @media (max-width: 768px) {
+      nav { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .docs-grid { grid-template-columns: 1fr; }
+      .stats-row { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <nav>
+    <div class="nav-logo">
+      <img src="../assets/logo-192.png" alt="CipherLink" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;border-radius:6px;" />
+      <span>Cipher</span>Link
+    </div>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="../index.html#features">Features</a></li>
+      <li><a href="../index.html#security">Security</a></li>
+      <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="hero">
+      <a href="../index.html" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to CipherLink
+      </a>
+      <div class="hero-badge">
+        <span class="dot"></span>
+        v3 Production Hardened
+      </div>
+      <h1>Security <span class="gradient">Audit Pack</span></h1>
+      <p>
+        Comprehensive security documentation for independent auditors. Threat model, attack surface review, protocol state specification, and security claims mapped to code and tests.
+      </p>
+    </div>
+
+    <div class="disclaimer">
+      <strong>Important:</strong> This project is a v3 production-hardened prototype. The audit pack is designed to facilitate independent security review. An external audit is recommended before high-risk production use.
+    </div>
+
+    <div class="stats-row">
+      <div class="stat">
+        <div class="num">156</div>
+        <div class="label">Tests</div>
+      </div>
+      <div class="stat">
+        <div class="num">34</div>
+        <div class="label">Security Claims</div>
+      </div>
+      <div class="stat">
+        <div class="num">9</div>
+        <div class="label">Adversary Classes</div>
+      </div>
+      <div class="stat">
+        <div class="num">24</div>
+        <div class="label">Features</div>
+      </div>
+      <div class="stat">
+        <div class="num">5</div>
+        <div class="label">Attack Surfaces</div>
+      </div>
+    </div>
+
+    <div class="docs-grid">
+      <a href="threat-model.md" class="doc-card">
+        <div class="doc-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h3>Threat Model</h3>
+        <p>9 adversary classes (passive observer, malicious server, nation-state, supply chain, device thief, insider, network attacker, quantum adversary, malicious contact). Security properties and coverage analysis.</p>
+        <span class="doc-link">
+          Read Document
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+
+      <a href="attack-surface.md" class="doc-card">
+        <div class="doc-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Attack Surface Review</h3>
+        <p>Comprehensive entry point analysis across client crypto library, mobile app, server relay, and network transport. Risk assessment with input validation coverage.</p>
+        <span class="doc-link">
+          Read Document
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+
+      <a href="protocol-state-spec.md" class="doc-card">
+        <div class="doc-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Protocol State Specification</h3>
+        <p>Formal session lifecycle with 5 states (UNINITIALIZED to CLOSED). State transition rules, invariants, epoch management, and key rotation policy.</p>
+        <span class="doc-link">
+          Read Document
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+
+      <a href="security-claims.md" class="doc-card">
+        <div class="doc-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3>Security Claims Mapping</h3>
+        <p>34 security claims mapped to specific code locations and test files. Each claim lists evidence, verification status, and gaps requiring attention.</p>
+        <span class="doc-link">
+          Read Document
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+
+      <a href="FEATURE_STATUS.md" class="doc-card">
+        <div class="doc-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h3>Feature Status Table</h3>
+        <p>Complete feature-by-feature status table across v1 core, v2 hardening, v3 production, server relay, and infrastructure. Implementation status with test counts.</p>
+        <span class="doc-link">
+          Read Document
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+
+      <a href="../SECURITY_ARCHITECTURE_V2.md" class="doc-card">
+        <div class="doc-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        </div>
+        <h3>v2 Security Architecture</h3>
+        <p>Full v2 architecture document with threat matrix, attack surface diagram, cryptographic design specifications, metadata resistance design, and phased upgrade plan.</p>
+        <span class="doc-link">
+          Read Document
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      <span class="author">CipherLink</span> Audit Pack &mdash;
+      by <span class="author">Belkis Aslani</span>
+    </p>
+    <p style="margin-top:8px;font-size:.75rem;color:var(--text-dim);">
+      Independent security audit recommended before high-risk production use.
+    </p>
+  </footer>
+</body>
+</html>

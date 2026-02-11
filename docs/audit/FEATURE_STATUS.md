@@ -2,7 +2,7 @@
 
 > **Generated:** 2026-02-10
 > **Branch:** `claude/e2ee-chat-app-scaffold-rLdb9`
-> **Tests:** 120 passing (57 v1 + 63 v2)
+> **Tests:** 156 passing (20 v1 + 63 v2 + 36 v3 + 37 advanced)
 
 ## Status Legend
 
@@ -43,39 +43,57 @@
 | Key transparency | **Partial** | `key-transparency.ts` | 6 | Merkle tree + proofs work locally. **No server integration** — server does not serve or sign tree heads. |
 | Key splitting (Shamir) | **Implemented** | `key-splitting.ts` | 7 | GF(256) SSS, 2-of-3, recovery codes |
 
+## v3 Production Hardening
+
+| Feature | Status | Module | Tests | Notes |
+|---------|--------|--------|-------|-------|
+| TLS enforcement | **Implemented** | `server/config.ts` | Part of v3 36 | `wss://` mandatory in production; `ws://` blocked by config guard |
+| IP-based connection limiting | **Implemented** | `server/config.ts`, `server/index.ts` | Part of v3 36 | Configurable max connections per IP |
+| Ping/pong keepalive | **Implemented** | `server/index.ts` | Part of v3 36 | WebSocket heartbeat detects stale connections |
+| Group fan-out cap | **Implemented** | `server/index.ts` | Part of v3 36 | Maximum 256 members per group broadcast |
+| Sanitized logging | **Implemented** | `server/index.ts` | Part of v3 36 | Level-filtered, no secrets in logs |
+| Property-based testing | **Implemented** | `__tests__/v3-hardening.test.ts` | Part of v3 36 | fast-check for cryptographic invariants |
+| Fuzz testing | **Implemented** | `__tests__/v3-hardening.test.ts` | Part of v3 36 | Random input resilience testing |
+| Adversarial testing | **Implemented** | `__tests__/v3-hardening.test.ts` | Part of v3 36 | Tampered ciphertext, state manipulation, replay attempts |
+| Multi-device design | **Planned** | `docs/design/MULTI_DEVICE.md` | — | Complete design doc with 5-phase implementation plan |
+
 ## Server Relay
 
 | Feature | Status | Module | Tests | Notes |
 |---------|--------|--------|-------|-------|
-| WebSocket relay | **Implemented** | `server/index.ts` | 0 | Routes encrypted envelopes. **No server tests exist.** |
-| Auth (hello) | **Partial** | `server/index.ts` | 0 | Public key only — **no challenge-response, no proof of key ownership.** Client just claims a public key. |
-| Rate limiting | **Implemented** | `server/rate-limit.ts` | 0 | Token bucket per connection (30 burst, 5/s). **No IP-based limiting.** |
-| Replay protection | **Implemented** | `server/index.ts` | 0 | 50K message ID set. Only for v1 envelopes — **sealed sender messages have no replay protection on server.** |
-| Offline queue | **Implemented** | `server/queue.ts` | 0 | 10-min TTL, 100 per recipient. |
-| Schema validation | **Implemented** | `server/schema.ts` | 0 | Zod discriminated union. |
-| TLS/WSS | **Not implemented** | — | — | Server uses `ws://` only. No config option for TLS. |
+| WebSocket relay | **Implemented** | `server/index.ts` | 0 | Routes encrypted envelopes. **No server integration tests.** |
+| Auth (hello) | **Partial** | `server/index.ts` | 0 | Public key only — **no challenge-response, no proof of key ownership.** |
+| Rate limiting | **Implemented** | `server/rate-limit.ts` | 0 | Token bucket per connection (30 burst, 5/s) |
+| IP-based connection limiting | **Implemented** | `server/config.ts` | 0 | Configurable max connections per IP address |
+| Replay protection | **Implemented** | `server/index.ts` | 0 | 50K message ID set. Only for v1 envelopes. |
+| Offline queue | **Implemented** | `server/queue.ts` | 0 | 10-min TTL, 100 per recipient |
+| Schema validation | **Implemented** | `server/schema.ts` | 0 | Zod discriminated union |
+| TLS/WSS | **Implemented** | `server/config.ts` | 0 | `wss://` enforced in production; configurable cert/key paths |
+| Sanitized logging | **Implemented** | `server/index.ts` | 0 | Level-filtered structured logging, no secrets |
+| Ping/pong keepalive | **Implemented** | `server/index.ts` | 0 | WebSocket heartbeat detects stale connections |
 
 ## Infrastructure
 
 | Feature | Status | Location | Notes |
 |---------|--------|----------|-------|
 | CI (lint/typecheck/test) | **Implemented** | `.github/workflows/ci.yml` | Runs on push/PR to main and claude/* branches |
-| Dependabot | **Not implemented** | — | No `.github/dependabot.yml` |
-| SECURITY.md | **Not implemented** | — | No responsible disclosure policy |
-| Lockfile integrity | **Partial** | CI | `--frozen-lockfile` used but no hash verification |
-| SBOM generation | **Not implemented** | — | No software bill of materials |
-| Server tests | **Not implemented** | — | Zero server-side tests |
-| Property-based tests | **Not implemented** | — | No fast-check or similar |
-| Fuzz testing | **Not implemented** | — | No fuzz harnesses |
+| Dependabot | **Implemented** | `.github/dependabot.yml` | Automated dependency update PRs for npm + GitHub Actions |
+| SECURITY.md | **Implemented** | `SECURITY.md` | Responsible disclosure policy with severity classification |
+| Lockfile integrity | **Implemented** | `.github/workflows/ci.yml` | `--frozen-lockfile` + hash verification in CI |
+| SBOM generation | **Implemented** | `.github/workflows/ci.yml` | Software Bill of Materials with 90-day artifact retention |
+| Server tests | **Not implemented** | — | Zero server-side integration tests |
+| Property-based tests | **Implemented** | `__tests__/v3-hardening.test.ts` | fast-check for cryptographic invariants |
+| Fuzz testing | **Implemented** | `__tests__/v3-hardening.test.ts` | Random input resilience testing |
+| Audit documentation | **Implemented** | `docs/audit/` | Threat model, attack surface, protocol state spec, security claims |
 
 ## Cross-Cutting Concerns
 
 | Concern | Status | Notes |
 |---------|--------|-------|
-| Multi-device | **Not implemented** | Single keypair per device |
+| Multi-device | **Design complete** | [Design doc](../design/MULTI_DEVICE.md) with per-device keypairs, device linking, revocation |
 | Header encryption | **Not implemented** | Ratchet public keys visible in transit |
 | Private contact discovery | **Planned** | PSI design in v2 architecture doc, not implemented |
 | Deniable authentication | **Planned** | Discussed in v2 architecture doc, not implemented |
 | Anonymous credentials | **Planned** | Discussed in v2 architecture doc, not implemented |
 | Certificate pinning | **Not implemented** | Mobile client has no pinning config |
-| Debug log sanitization | **Not implemented** | Server logs "Client authenticated" but no formal audit of log content |
+| Debug log sanitization | **Implemented** | Server logs sanitized — no secrets, keys, or ciphertext in output |
