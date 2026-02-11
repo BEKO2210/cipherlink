@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CipherLink — Impressum</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/logo-192.png" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #0a0a1a; --bg-secondary: #111127; --bg-card: #16163a;
+      --accent: #e94560; --accent-glow: rgba(233,69,96,.35);
+      --text: #eaeaea; --text-muted: #8888aa; --text-dim: #555577;
+      --radius: 16px; --radius-sm: 10px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg-primary); color: var(--text); line-height: 1.8; min-height: 100vh; }
+    a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
+    a:hover { opacity: .8; }
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(233,69,96,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(233,69,96,.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 40px; background: rgba(10,10,26,.92);
+      backdrop-filter: blur(20px); border-bottom: 1px solid rgba(233,69,96,.1);
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { color: var(--text-muted); font-size: .9rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--text); opacity: 1; }
+    .container { max-width: 800px; margin: 0 auto; padding: 60px 24px 80px; position: relative; z-index: 1; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-muted); font-size: .85rem; margin-bottom: 32px;
+    }
+    .back-link:hover { color: var(--text); opacity: 1; }
+    h1 { font-size: 2.2rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 8px; }
+    h1 .gradient {
+      background: linear-gradient(135deg, var(--accent) 0%, #ff6b8a 50%, #c23152 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .subtitle { color: var(--text-muted); font-size: .9rem; margin-bottom: 40px; }
+    .legal-section { margin-bottom: 36px; }
+    .legal-section h2 {
+      font-size: 1.1rem; font-weight: 700; color: var(--accent);
+      margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 1px solid rgba(233,69,96,.15);
+    }
+    .legal-section p, .legal-section li { color: var(--text-muted); font-size: .92rem; margin-bottom: 8px; }
+    .legal-section ul { list-style: none; padding: 0; }
+    .legal-section ul li { padding-left: 16px; position: relative; }
+    .legal-section ul li::before {
+      content: ''; position: absolute; left: 0; top: 10px;
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+    }
+    .info-box {
+      background: var(--bg-secondary); border: 1px solid rgba(255,255,255,.06);
+      border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
+      padding: 20px 24px; margin: 16px 0;
+    }
+    .info-box p { color: var(--text); margin-bottom: 4px; }
+    .info-box .label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 8px; }
+    footer {
+      border-top: 1px solid rgba(255,255,255,.05); padding: 40px 24px;
+      text-align: center; position: relative; z-index: 1;
+    }
+    footer p { color: var(--text-dim); font-size: .85rem; }
+    footer .author { color: var(--accent); font-weight: 600; }
+    .footer-links { margin-top: 12px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .footer-links a { color: var(--text-muted); font-size: .8rem; }
+    @media (max-width: 768px) {
+      nav { padding: 12px 20px; }
+      .nav-links { display: none; }
+      .container { padding: 40px 16px 60px; }
+      h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <nav>
+    <div class="nav-logo">
+      <img src="assets/logo-192.png" alt="CipherLink" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;border-radius:6px;" />
+      <span>Cipher</span>Link
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="datenschutz.html">Datenschutz</a></li>
+      <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <a href="index.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Zuruck zur Startseite
+    </a>
+
+    <h1><span class="gradient">Impressum</span></h1>
+    <p class="subtitle">Angaben gemaß § 5 TMG / § 18 MStV</p>
+
+    <div class="legal-section">
+      <h2>Verantwortlich</h2>
+      <div class="info-box">
+        <div class="label">Anbieter &amp; inhaltlich Verantwortlicher</div>
+        <p><strong>Belkis Aslani</strong></p>
+        <p>[Adresse bitte eintragen]</p>
+        <p>[PLZ Ort]</p>
+        <p>Deutschland</p>
+      </div>
+    </div>
+
+    <div class="legal-section">
+      <h2>Kontakt</h2>
+      <div class="info-box">
+        <div class="label">Erreichbarkeit</div>
+        <p>E-Mail: [E-Mail-Adresse bitte eintragen]</p>
+        <p>GitHub: <a href="https://github.com/BEKO2210" target="_blank">github.com/BEKO2210</a></p>
+      </div>
+    </div>
+
+    <div class="legal-section">
+      <h2>Projektbeschreibung</h2>
+      <p>
+        CipherLink ist ein Open-Source-Forschungsprojekt fur Ende-zu-Ende-verschlusselte Kommunikation
+        basierend auf dem Signal-Protokoll. Das Projekt dient zu Bildungs- und Forschungszwecken
+        und wird unter der MIT-Lizenz auf GitHub veroffentlicht.
+      </p>
+      <p>
+        Es handelt sich um einen <strong>Prototyp mit v3-Produktionshartung</strong>, der vor einem
+        produktiven Einsatz mit hohem Risiko unabhangig auditiert werden sollte.
+      </p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Haftungsausschluss</h2>
+      <p>
+        Die Inhalte dieser Website und des zugehorigen Softwareprojekts wurden mit großtmoglicher Sorgfalt erstellt.
+        Der Anbieter ubernimmt jedoch keine Gewahr fur die Richtigkeit, Vollstandigkeit und Aktualitat der
+        bereitgestellten Inhalte und des Quellcodes.
+      </p>
+      <p>
+        <strong>Kryptographischer Hinweis:</strong> Obwohl CipherLink etablierte kryptographische Verfahren
+        implementiert (Signal-Protokoll, XChaCha20-Poly1305, X25519, HKDF-SHA256, Argon2id), ist die Software
+        nicht unabhangig auditiert. Der Einsatz erfolgt auf eigene Verantwortung. Fur Anwendungen mit hohem
+        Sicherheitsbedarf wird ein professionelles Sicherheitsaudit empfohlen.
+      </p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Urheberrecht</h2>
+      <p>
+        Der Quellcode von CipherLink steht unter der <strong>MIT-Lizenz</strong>.
+        Die Inhalte dieser Website (Texte, Grafiken, Layout) unterliegen dem deutschen Urheberrecht.
+        Die Vervielfaltigung, Bearbeitung und Verbreitung außerhalb der Grenzen des Urheberrechts
+        bedurfen der schriftlichen Zustimmung des Autors.
+      </p>
+    </div>
+
+    <div class="legal-section">
+      <h2>Streitbeilegung</h2>
+      <p>
+        Die Europaische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
+        <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">ec.europa.eu/consumers/odr</a>.
+        Wir sind nicht bereit und nicht verpflichtet, an einem Streitbeilegungsverfahren vor einer
+        Verbraucherschlichtungsstelle teilzunehmen.
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    <p><span class="author">CipherLink</span> &mdash; von <span class="author">Belkis Aslani</span></p>
+    <div class="footer-links">
+      <a href="index.html">Startseite</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>
