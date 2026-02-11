@@ -18,7 +18,7 @@
     "expo-clipboard": "~7.0.0",
     "expo-secure-store": "~15.0.8",
     "expo-status-bar": "~2.0.0",
-    "react": "18.3.1",
+    "react": "19.2.4",
     "react-native": "0.76.7",
     "react-native-get-random-values": "~2.0.0",
     "react-native-safe-area-context": "4.14.1",
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@types/libsodium-wrappers-sumo": "^0.7.8",
-    "@types/react": "~18.3.0",
+    "@types/react": "~19.2.13",
     "typescript": "^5.5.0",
     "eslint": "^9.0.0",
     "typescript-eslint": "^8.0.0",
