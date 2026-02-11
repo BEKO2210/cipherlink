@@ -35,8 +35,8 @@ importers:
         specifier: 0.76.7
         version: 0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@18.3.28)(react@18.3.1)
       react-native-get-random-values:
-        specifier: ~1.11.0
-        version: 1.11.0(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@18.3.28)(react@18.3.1))
+        specifier: ~2.0.0
+        version: 2.0.0(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@18.3.28)(react@18.3.1))
       react-native-safe-area-context:
         specifier: 4.14.1
         version: 4.14.1(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@18.3.28)(react@18.3.1))(react@18.3.1)
@@ -3773,10 +3773,10 @@ packages:
   react-is@19.2.4:
     resolution: {integrity: sha512-W+EWGn2v0ApPKgKKCy/7s7WHXkboGcsrXE+2joLyVxkbyVQfO3MUEaUQDHoSmb8TFFrSKYa9mw64WZHNHSDzYA==}
 
-  react-native-get-random-values@1.11.0:
-    resolution: {integrity: sha512-4BTbDbRmS7iPdhYLRcz3PGFIpFJBwNZg9g42iwa2P6FOv9vZj/xJc678RZXnLNZzd0qd7Q3CCF6Yd+CU2eoXKQ==}
+  react-native-get-random-values@2.0.0:
+    resolution: {integrity: sha512-wx7/aPqsUIiWsG35D+MsUJd8ij96e3JKddklSdrdZUrheTx89gPtz3Q2yl9knBArj5u26Cl23T88ai+Q0vypdQ==}
     peerDependencies:
-      react-native: '>=0.56'
+      react-native: '>=0.81'
 
   react-native-helmet-async@2.0.4:
     resolution: {integrity: sha512-m3CkXWss6B1dd6mCMleLpzDCJJGGaHOLQsUzZv8kAASJmMfmVT4d2fx375iXKTRWT25ThBfae3dECuX5cq/8hg==}
@@ -8900,7 +8900,7 @@ snapshots:
 
   react-is@19.2.4: {}
 
-  react-native-get-random-values@1.11.0(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@18.3.28)(react@18.3.1)):
+  react-native-get-random-values@2.0.0(react-native@0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@18.3.28)(react@18.3.1)):
     dependencies:
       fast-base64-decode: 1.0.0
       react-native: 0.76.7(@babel/core@7.29.0)(@babel/preset-env@7.29.0(@babel/core@7.29.0))(@types/react@18.3.28)(react@18.3.1)
