@@ -45,8 +45,8 @@ importers:
         version: 4.5.0(react-native@0.83.1(@babel/core@7.29.0)(@types/react@19.2.13)(react@19.2.4))(react@19.2.4)
     devDependencies:
       '@eslint/js':
-        specifier: ^9.0.0
-        version: 9.39.2
+        specifier: ^10.0.1
+        version: 10.0.1(eslint@10.0.0)
       '@types/libsodium-wrappers-sumo':
         specifier: ^0.8.2
         version: 0.8.2
@@ -73,8 +73,8 @@ importers:
         version: 3.25.76
     devDependencies:
       '@eslint/js':
-        specifier: ^9.0.0
-        version: 9.39.2
+        specifier: ^10.0.1
+        version: 10.0.1(eslint@10.0.0)
       '@types/node':
         specifier: ^25.2.3
         version: 25.2.3
@@ -101,8 +101,8 @@ importers:
         version: 0.8.2
     devDependencies:
       '@eslint/js':
-        specifier: ^9.0.0
-        version: 9.39.2
+        specifier: ^10.0.1
+        version: 10.0.1(eslint@10.0.0)
       '@types/libsodium-wrappers-sumo':
         specifier: ^0.8.2
         version: 0.8.2
@@ -120,7 +120,7 @@ importers:
         version: 8.55.0(eslint@10.0.0)(typescript@5.9.3)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)
+        version: 4.0.18(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
 packages:
 
@@ -1031,9 +1031,14 @@ packages:
     resolution: {integrity: sha512-/nr9K9wkr3P1EzFTdFdMoLuo1PmIxjmwvPozwoSodjNBdefGujXQUF93u1DDZpEaTuDvMsIQddsd35BwtrW9Xw==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@eslint/js@9.39.2':
-    resolution: {integrity: sha512-q1mjIoW1VX4IvSocvM/vbTiveKC4k9eLrajNEuSsmjymSDEbpGddtpfOoN7YGAqBK3NG+uqo8ia4PDTt8buCYA==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+  '@eslint/js@10.0.1':
+    resolution: {integrity: sha512-zeR9k5pd4gxjZ0abRoIaxdc7I3nDktoXZk2qOv9gCNWx3mVwEn32VRhyLaRsDiJjTs0xq/T8mfPtyuXu7GWBcA==}
+    engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+    peerDependencies:
+      eslint: ^10.0.0
+    peerDependenciesMeta:
+      eslint:
+        optional: true
 
   '@eslint/object-schema@3.0.1':
     resolution: {integrity: sha512-P9cq2dpr+LU8j3qbLygLcSZrl2/ds/pUpfnHNNuk5HW7mnngHs+6WSq5C9mO3rqRX8A1poxqLTC9cu0KOyJlBg==}
@@ -5648,7 +5653,9 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@eslint/js@9.39.2': {}
+  '@eslint/js@10.0.1(eslint@10.0.0)':
+    optionalDependencies:
+      eslint: 10.0.0
 
   '@eslint/object-schema@3.0.1': {}
 
@@ -6774,13 +6781,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.0.3
 
-  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0))':
+  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 4.0.18
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)
+      vite: 7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
   '@vitest/pretty-format@4.0.18':
     dependencies:
@@ -9476,7 +9483,7 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  vite@7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0):
+  vite@7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       esbuild: 0.27.3
       fdir: 6.5.0(picomatch@4.0.3)
@@ -9490,11 +9497,12 @@ snapshots:
       lightningcss: 1.27.0
       terser: 5.46.0
       tsx: 4.21.0
+      yaml: 2.8.2
 
-  vitest@4.0.18(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0):
+  vitest@4.0.18(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.18
-      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0))
+      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.18
       '@vitest/runner': 4.0.18
       '@vitest/snapshot': 4.0.18
@@ -9511,7 +9519,7 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vite: 7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)
+      vite: 7.3.1(@types/node@25.2.3)(lightningcss@1.27.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.2.3
