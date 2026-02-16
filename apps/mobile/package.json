@@ -14,7 +14,7 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-    "expo": "~52.0.0",
+    "expo": "~54.0.33",
     "expo-clipboard": "~7.0.0",
     "expo-secure-store": "~15.0.8",
     "expo-status-bar": "~3.0.9",
