@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@types/libsodium-wrappers-sumo": "^0.8.2",
-    "@types/react": "~19.2.13",
+    "@types/react": "~19.2.14",
     "typescript": "^5.5.0",
     "eslint": "^10.0.0",
     "typescript-eslint": "^8.0.0",
