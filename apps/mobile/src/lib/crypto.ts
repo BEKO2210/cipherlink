@@ -146,39 +146,57 @@ export async function deriveMessageKey(
   return key;
 }
 
-// --- Message Padding (PKCS7, 256-byte blocks) ---
+// --- Message Padding ---
+// Uses length-prefix + random padding to fixed 256-byte blocks.
+// This avoids PKCS7's 255-byte block limit and eliminates padding oracles
+// since padding bytes are random (no structure to attack).
 
 const PAD_BLOCK_SIZE = 256;
+const LENGTH_PREFIX_BYTES = 2; // Big-endian uint16 for plaintext length
 
 export function padMessage(plaintext: Uint8Array): Uint8Array {
-  const padLen = PAD_BLOCK_SIZE - (plaintext.length % PAD_BLOCK_SIZE);
-  const padded = new Uint8Array(plaintext.length + padLen);
-  padded.set(plaintext, 0);
-  for (let i = plaintext.length; i < padded.length; i++) {
-    padded[i] = padLen;
+  if (plaintext.length > 0xffff) {
+    throw new Error("Plaintext too large for padding scheme");
   }
+  // Total size: 2-byte length prefix + plaintext + random padding to block boundary
+  const contentLen = LENGTH_PREFIX_BYTES + plaintext.length;
+  const totalLen =
+    contentLen % PAD_BLOCK_SIZE === 0
+      ? contentLen
+      : contentLen + (PAD_BLOCK_SIZE - (contentLen % PAD_BLOCK_SIZE));
+  const padded = new Uint8Array(totalLen);
+
+  // Length prefix (big-endian uint16)
+  padded[0] = (plaintext.length >> 8) & 0xff;
+  padded[1] = plaintext.length & 0xff;
+
+  // Plaintext
+  padded.set(plaintext, LENGTH_PREFIX_BYTES);
+
+  // Fill remainder with random bytes (no padding oracle possible)
+  if (totalLen > contentLen) {
+    const randomPad = sodium.randombytes_buf(totalLen - contentLen);
+    padded.set(randomPad, contentLen);
+  }
+
   return padded;
 }
 
 /**
- * Remove PKCS7 padding with full validation — checks ALL padding bytes,
- * not just the last one, to prevent padding oracle attacks.
+ * Remove padding — reads length prefix and extracts exactly that many bytes.
  */
 export function unpadMessage(padded: Uint8Array): Uint8Array {
-  if (padded.length === 0 || padded.length % PAD_BLOCK_SIZE !== 0) {
+  if (padded.length < LENGTH_PREFIX_BYTES) {
+    throw new Error("Padded message too short");
+  }
+  if (padded.length % PAD_BLOCK_SIZE !== 0) {
     throw new Error("Invalid padded message length");
   }
-  const padLen = padded[padded.length - 1]!;
-  if (padLen === 0 || padLen > PAD_BLOCK_SIZE || padLen > padded.length) {
-    throw new Error("Invalid padding value");
+  const plaintextLen = (padded[0]! << 8) | padded[1]!;
+  if (plaintextLen > padded.length - LENGTH_PREFIX_BYTES) {
+    throw new Error("Invalid length prefix: exceeds padded data");
   }
-  // Validate ALL padding bytes match
-  for (let i = padded.length - padLen; i < padded.length; i++) {
-    if (padded[i] !== padLen) {
-      throw new Error("Invalid padding: inconsistent padding bytes");
-    }
-  }
-  return padded.slice(0, padded.length - padLen);
+  return padded.slice(LENGTH_PREFIX_BYTES, LENGTH_PREFIX_BYTES + plaintextLen);
 }
 
 // --- Envelope ---

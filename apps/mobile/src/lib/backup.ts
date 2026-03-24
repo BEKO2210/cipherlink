@@ -44,10 +44,17 @@ export async function createBackup(
     sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES,
   );
 
+  const version = 1;
+
+  // AAD binds version + KDF params to ciphertext (prevents param tampering)
+  const aad = new TextEncoder().encode(
+    JSON.stringify({ version, opsLimit, memLimit }),
+  );
+
   const plaintext = new TextEncoder().encode(JSON.stringify(data));
   const ciphertext = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
     plaintext,
-    null,
+    aad,
     null,
     nonce,
     key,
@@ -56,7 +63,7 @@ export async function createBackup(
   sodium.memzero(key);
 
   return {
-    version: 1,
+    version,
     salt: toBase64(salt),
     nonce: toBase64(nonce),
     ciphertext: toBase64(ciphertext),
@@ -82,7 +89,12 @@ export async function restoreBackup(
 ): Promise<Record<string, unknown>> {
   await initCrypto();
 
-  // Enforce minimum KDF parameters
+  // Validate backup version
+  if (payload.version !== 1) {
+    throw new Error(`Unsupported backup version: ${payload.version}`);
+  }
+
+  // Enforce minimum KDF parameters to prevent downgrade
   if (payload.opsLimit < MIN_OPS_LIMIT) {
     throw new Error("Backup KDF opsLimit below minimum security threshold");
   }
@@ -103,10 +115,19 @@ export async function restoreBackup(
     sodium.crypto_pwhash_ALG_ARGON2ID13,
   );
 
+  // Reconstruct AAD to verify KDF params haven't been tampered
+  const aad = new TextEncoder().encode(
+    JSON.stringify({
+      version: payload.version,
+      opsLimit: payload.opsLimit,
+      memLimit: payload.memLimit,
+    }),
+  );
+
   const plaintext = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
     null,
     ciphertext,
-    null,
+    aad,
     nonce,
     key,
   );
@@ -163,6 +184,7 @@ function gf256Div(a: number, b: number): number {
 
 /**
  * Split a secret into N shares with threshold K.
+ * Share indices are GF(256) elements (1-255), so max 255 shares.
  */
 export async function splitSecret(
   secret: Uint8Array,
@@ -171,6 +193,9 @@ export async function splitSecret(
 ): Promise<Share[]> {
   await initCrypto();
 
+  if (totalShares > 255) {
+    throw new Error("Maximum 255 shares (GF(256) index limit)");
+  }
   if (threshold > totalShares) {
     throw new Error("Threshold cannot exceed total shares");
   }
@@ -209,10 +234,18 @@ export async function splitSecret(
 
 /**
  * Reconstruct a secret from K shares using Lagrange interpolation.
+ * Validates that all shares have the same data length.
  */
 export function reconstructSecret(shares: Share[]): Uint8Array {
   if (shares.length < 2) {
     throw new Error("Need at least 2 shares to reconstruct");
+  }
+  // Validate all shares have consistent data length
+  const expectedLen = shares[0]!.data.length;
+  for (const share of shares) {
+    if (share.data.length !== expectedLen) {
+      throw new Error("Share data length mismatch — corrupted shares");
+    }
   }
 
   const length = shares[0]!.data.length;
