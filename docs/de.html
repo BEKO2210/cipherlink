@@ -68,11 +68,12 @@
       border-radius: 50%;
       opacity: 0;
       animation: particleFloat linear infinite;
+      will-change: transform, opacity;
     }
     @keyframes particleFloat {
       0%   { opacity: 0; transform: translateY(100vh) scale(0); }
-      10%  { opacity: .6; }
-      90%  { opacity: .6; }
+      15%  { opacity: .35; }
+      85%  { opacity: .35; }
       100% { opacity: 0; transform: translateY(-10vh) scale(1); }
     }
 
@@ -261,11 +262,11 @@
       padding: 28px 0;
       border-bottom: 1px solid rgba(255,255,255,.04);
       opacity: 0;
-      transform: translateY(20px);
-      transition: all .6s ease-out;
+      transform: translateY(12px) scale(.98);
+      transition: opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1);
     }
     .sim-stage.visible {
-      opacity: 1; transform: translateY(0);
+      opacity: 1; transform: translateY(0) scale(1);
     }
     .sim-stage:last-child { border-bottom: none; }
     .sim-device {
@@ -341,7 +342,7 @@
       border: 1px solid rgba(233,69,96,.2);
       border-left: 3px solid var(--accent);
       border-radius: var(--radius-sm);
-      padding: 16px 20px;
+      padding: 0 20px;
       margin: 0 0 16px 0;
       font-size: .88rem;
       line-height: 1.65;
@@ -349,12 +350,12 @@
       opacity: 0;
       max-height: 0;
       overflow: hidden;
-      transition: all .6s cubic-bezier(.4, 0, .2, 1);
+      transition: opacity .4s cubic-bezier(.4,0,.2,1), max-height .5s cubic-bezier(.4,0,.2,1), padding .5s cubic-bezier(.4,0,.2,1);
     }
     .sim-popup.visible {
       opacity: 1;
-      max-height: 200px;
-      margin: 0 0 16px 0;
+      max-height: 250px;
+      padding: 16px 20px;
     }
     .sim-popup .popup-header {
       font-weight: 700;
@@ -578,8 +579,8 @@
 
     /* ===== SCROLL REVEAL ===== */
     .reveal {
-      opacity: 0; transform: translateY(40px);
-      transition: all .7s ease-out;
+      opacity: 0; transform: translateY(30px);
+      transition: opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
     }
     .reveal.visible {
       opacity: 1; transform: translateY(0);
@@ -621,8 +622,7 @@
         <li><a href="#features">Funktionen</a></li>
         <li><a href="#architecture">Architektur</a></li>
         <li><a href="#security">Sicherheit</a></li>
-        <li><a href="#start">Loslegen</a></li>
-        <li><a href="SECURITY_ARCHITECTURE_V2.md">v2 Docs</a></li>
+        <li><a href="#download">Download</a></li>
         <li><a href="audit/">Audit-Paket</a></li>
         <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
       </ul>
@@ -661,7 +661,7 @@
         </a>
       </div>
       <p class="hero-warning">
-        Audit vor Produktiveinsatz mit hohem Risiko empfohlen. Siehe <a href="audit/" style="color:var(--warning)">Audit-Paket</a> &amp; <a href="SECURITY_ARCHITECTURE_V2.md" style="color:var(--warning)">Sicherheitsarchitektur</a>.
+        Audit vor Produktiveinsatz mit hohem Risiko empfohlen. Siehe <a href="audit/" style="color:var(--warning)">Audit-Paket</a> &amp; <a href="https://github.com/BEKO2210/cipherlink/blob/main/docs/SECURITY_ARCHITECTURE_V2.md" style="color:var(--warning)">Sicherheitsarchitektur</a>.
       </p>
     </div>
   </section>
@@ -1249,12 +1249,19 @@
   <footer>
     <p>
       <span class="author">CipherLink</span> &mdash;
-      Ende-zu-Ende verschlüsseltes Chat-Gerüst &mdash;
+      Ende-zu-Ende verschlüsselter Chat &mdash;
       von <span class="author">Belkis Aslani</span>
     </p>
     <p style="margin-top:8px;font-size:.75rem;color:var(--text-dim);">
-      MIT-Lizenz &mdash; Audit vor Produktiveinsatz mit hohem Risiko empfohlen.
+      MIT-Lizenz &mdash; Open-Source-Projekt &mdash; <a href="https://github.com/BEKO2210/cipherlink" target="_blank" style="color:var(--text-dim);">Quellcode auf GitHub</a>
     </p>
+    <div style="margin-top:16px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap;">
+      <a href="impressum.html" style="color:var(--text-muted);font-size:.8rem;transition:color .2s;">Impressum</a>
+      <a href="datenschutz.html" style="color:var(--text-muted);font-size:.8rem;transition:color .2s;">Datenschutz</a>
+      <a href="audit/" style="color:var(--text-muted);font-size:.8rem;transition:color .2s;">Audit-Paket</a>
+      <a href="https://github.com/BEKO2210/cipherlink/security" target="_blank" style="color:var(--text-muted);font-size:.8rem;transition:color .2s;">Schwachstelle melden</a>
+      <a href="https://github.com/BEKO2210/cipherlink" target="_blank" style="color:var(--text-muted);font-size:.8rem;transition:color .2s;">GitHub</a>
+    </div>
   </footer>
 
   <script>
@@ -1282,13 +1289,13 @@
     /* ===== Particles ===== */
     (function createParticles() {
       const container = document.getElementById('particles');
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 18; i++) {
         const p = document.createElement('div');
         p.className = 'particle';
         p.style.left = Math.random() * 100 + '%';
-        p.style.animationDuration = (8 + Math.random() * 12) + 's';
-        p.style.animationDelay = Math.random() * 10 + 's';
-        p.style.width = p.style.height = (2 + Math.random() * 4) + 'px';
+        p.style.animationDuration = (12 + Math.random() * 18) + 's';
+        p.style.animationDelay = Math.random() * 15 + 's';
+        p.style.width = p.style.height = (1.5 + Math.random() * 3) + 'px';
         container.appendChild(p);
       }
     })();
@@ -1352,7 +1359,6 @@
       const stage = document.querySelector(`.sim-stage[data-stage="${n}"]`);
       if (stage) {
         stage.classList.add('visible');
-        stage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     }
 
@@ -1367,7 +1373,6 @@
       title.textContent = info.title;
       text.textContent = info.text;
       popup.classList.add('visible');
-      popup.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function updateProgress(step, status) {
@@ -1392,6 +1397,7 @@
     async function runSimulation() {
       simBtn.style.display = 'none';
       resetBtn.style.display = 'inline-flex';
+      document.querySelector('.sim-wrapper').scrollIntoView({behavior:'smooth',block:'center'});
 
       const alicePub = randomHex(16) + '...';
       const bobPub = randomHex(16) + '...';
