@@ -201,4 +201,64 @@ export class CipherLinkClient {
   updateUrl(url: string): void {
     this.url = url;
   }
+
+  /**
+   * Test if a relay server is reachable. Opens a WebSocket, waits for
+   * a "welcome" response, then closes. Returns latency in ms or throws.
+   */
+  static testConnection(
+    url: string,
+    timeoutMs = 8000,
+  ): Promise<{ ok: true; latencyMs: number }> {
+    return new Promise((resolve, reject) => {
+      const start = Date.now();
+      let ws: WebSocket | null = null;
+      const timer = setTimeout(() => {
+        ws?.close();
+        reject(new Error("Connection timed out"));
+      }, timeoutMs);
+
+      try {
+        ws = new WebSocket(url);
+      } catch (_e: unknown) {
+        clearTimeout(timer);
+        reject(new Error("Invalid server URL"));
+        return;
+      }
+
+      ws.onopen = () => {
+        // Send a minimal hello with a test key to trigger "welcome"
+        ws?.send(
+          JSON.stringify({
+            type: "hello",
+            publicKey: "dGVzdC1jb25uZWN0aW9uLXBpbmc=", // "test-connection-ping" base64
+          }),
+        );
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data as string);
+          if (data.type === "welcome") {
+            clearTimeout(timer);
+            const latencyMs = Date.now() - start;
+            ws?.close();
+            resolve({ ok: true, latencyMs });
+          }
+        } catch {
+          // ignore
+        }
+      };
+
+      ws.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error("Server unreachable"));
+      };
+
+      ws.onclose = () => {
+        clearTimeout(timer);
+        // Only reject if we haven't resolved yet
+      };
+    });
+  }
 }

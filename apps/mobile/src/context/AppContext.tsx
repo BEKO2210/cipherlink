@@ -140,7 +140,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [contacts, setContacts] = useState<StoredContact[]>([]);
   const [groups, setGroups] = useState<StoredGroup[]>([]);
   const [settings, setSettings] = useState<AppSettings>({
-    serverUrl: "ws://localhost:4200",
+    serverUrl: "wss://relay.cipherlink.app",
     sealedSender: true,
     quantumResistant: true,
     messagePadding: true,

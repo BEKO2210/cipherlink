@@ -150,6 +150,9 @@ export async function loadGroups(): Promise<StoredGroup[]> {
 
 // --- Settings ---
 
+/** The official CipherLink relay — shown as "CipherLink System Server" in UI */
+export const SYSTEM_SERVER_URL = "wss://relay.cipherlink.app";
+
 export interface AppSettings {
   serverUrl: string;
   sealedSender: boolean;
@@ -158,7 +161,7 @@ export interface AppSettings {
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
-  serverUrl: "ws://localhost:4200",
+  serverUrl: SYSTEM_SERVER_URL,
   sealedSender: true,
   quantumResistant: true,
   messagePadding: true,
