@@ -18,6 +18,7 @@ import {
 import { Colors } from "../theme/colors";
 import { useApp } from "../context/AppContext";
 import { CipherLinkClient } from "../lib/ws-client";
+import { SYSTEM_SERVER_URL } from "../lib/secure-storage";
 
 // ---------------------------------------------------------------------------
 // Minimal Icon Components (no external deps)
@@ -253,7 +254,7 @@ export function SettingsScreen() {
 
         {/* Server URL */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Relay Server URL</Text>
+          <Text style={styles.cardLabel}>Relay Server</Text>
           {editingUrl ? (
             <View style={styles.editRow}>
               <TextInput
@@ -262,7 +263,7 @@ export function SettingsScreen() {
                 onChangeText={setServerUrl}
                 autoCapitalize="none"
                 autoCorrect={false}
-                placeholder="wss://relay.example.com"
+                placeholder="wss://your-server.example.com"
                 placeholderTextColor={Colors.textDim}
                 keyboardType="url"
               />
@@ -284,15 +285,34 @@ export function SettingsScreen() {
               style={styles.urlDisplay}
               onPress={() => setEditingUrl(true)}
             >
-              <Text style={styles.urlText} numberOfLines={1}>
-                {settings.serverUrl}
-              </Text>
-              <Text style={styles.urlHint}>Tap to change</Text>
+              {settings.serverUrl === SYSTEM_SERVER_URL ? (
+                <>
+                  <Text style={styles.systemLabel}>CipherLink System Server</Text>
+                  <Text style={styles.urlHint}>Official relay — tap to use your own</Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.urlText} numberOfLines={1}>
+                    {settings.serverUrl}
+                  </Text>
+                  <Text style={styles.urlHint}>Custom server — tap to change</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
+          {settings.serverUrl !== SYSTEM_SERVER_URL && (
+            <TouchableOpacity
+              onPress={async () => {
+                await updateSettings({ serverUrl: SYSTEM_SERVER_URL });
+                setServerUrl(SYSTEM_SERVER_URL);
+              }}
+              style={styles.resetUrlBtn}
+            >
+              <Text style={styles.resetUrlText}>Reset to System Server</Text>
             </TouchableOpacity>
           )}
           <Text style={styles.cardNote}>
-            Default: wss://relay.cipherlink.app{"\n"}
-            You can host your own relay server
+            You can host your own relay server — see docs for setup
           </Text>
         </View>
 
@@ -768,6 +788,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
   },
+  systemLabel: {
+    color: Colors.success,
+    fontSize: 14,
+    fontWeight: "700",
+  },
   urlText: {
     color: Colors.textSecondary,
     fontSize: 13,
@@ -777,6 +802,16 @@ const styles = StyleSheet.create({
     color: Colors.textDim,
     fontSize: 10,
     marginTop: 4,
+  },
+  resetUrlBtn: {
+    marginTop: 10,
+    paddingVertical: 8,
+    alignItems: "center",
+  },
+  resetUrlText: {
+    color: Colors.accent,
+    fontSize: 12,
+    fontWeight: "600",
   },
 
   // Test

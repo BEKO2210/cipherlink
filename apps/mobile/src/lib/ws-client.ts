@@ -220,7 +220,7 @@ export class CipherLinkClient {
 
       try {
         ws = new WebSocket(url);
-      } catch (e: unknown) {
+      } catch (_e: unknown) {
         clearTimeout(timer);
         reject(new Error("Invalid server URL"));
         return;
