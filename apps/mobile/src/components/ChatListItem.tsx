@@ -51,7 +51,7 @@ export function ChatListItem({
           </Text>
           <View style={styles.topRight}>
             <EncryptionBadge compact sealed />
-            {timestamp && (
+            {timestamp != null && (
               <Text style={styles.time}>
                 {formatTime(timestamp)}
               </Text>
@@ -66,7 +66,7 @@ export function ChatListItem({
       </View>
 
       {/* Unread badge */}
-      {unread && unread > 0 ? (
+      {unread != null && unread > 0 ? (
         <View style={styles.unreadBadge}>
           <Text style={styles.unreadText}>{unread}</Text>
         </View>

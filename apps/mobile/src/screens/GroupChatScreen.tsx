@@ -1,8 +1,9 @@
 /**
  * Group chat screen — E2EE group messaging with Sender Keys.
+ * Sender key is persisted via ref to survive re-renders (not regenerated each mount).
  * @author Belkis Aslani
  */
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, memo } from "react";
 import {
   View,
   Text,
@@ -19,7 +20,7 @@ import { useApp } from "../context/AppContext";
 import type { ChatMessage } from "../context/AppContext";
 import { MessageBubble } from "../components/MessageBubble";
 import { EncryptionBadge } from "../components/EncryptionBadge";
-import { toBase64 } from "../lib/crypto";
+import { toBase64, generateMessageId } from "../lib/crypto";
 import {
   generateSenderKey,
   groupEncrypt,
@@ -32,6 +33,11 @@ interface GroupChatScreenProps {
   groupName: string;
 }
 
+const MemoizedBubble = memo(MessageBubble);
+
+/** Persist sender keys across mounts by groupId */
+const senderKeyCache = new Map<string, SenderKey>();
+
 export function GroupChatScreen({ groupId, groupName }: GroupChatScreenProps) {
   const {
     identity,
@@ -40,82 +46,83 @@ export function GroupChatScreen({ groupId, groupName }: GroupChatScreenProps) {
     groups,
     chatMessages,
     addChatMessage,
+    connected,
   } = useApp();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
-  const [senderKey, setSenderKey] = useState<SenderKey | null>(null);
+  const senderKeyRef = useRef<SenderKey | null>(senderKeyCache.get(groupId) ?? null);
   const flatListRef = useRef<FlatList>(null);
 
   const group = groups.find((g) => g.id === groupId);
 
-  // Initialize sender key
+  // Initialize or restore sender key
   useEffect(() => {
+    if (senderKeyRef.current) return; // Already have a key
+
     (async () => {
       const key = await generateSenderKey(groupId);
-      setSenderKey(key);
+      senderKeyRef.current = key;
+      senderKeyCache.set(groupId, key);
 
-      // Distribute sender key to group members
+      // Distribute to group members
       if (identity && client?.connected && group) {
-        // Distribute sender key to each member (encrypted per-member in production)
         createSenderKeyDistribution(key, groupId, identity.dh.publicKey);
       }
     })();
-  }, [groupId]);
+  }, [groupId, identity, client, group]);
 
-  // Load existing messages
+  // Load existing messages from context
   useEffect(() => {
     const key = `group:${groupId}`;
     const existing = chatMessages.get(key) ?? [];
     setMessages(existing);
-  }, [groupId]);
+  }, [groupId, chatMessages]);
 
   useEffect(() => {
     if (messages.length > 0) {
-      setTimeout(
-        () => flatListRef.current?.scrollToEnd({ animated: true }),
-        100,
-      );
+      requestAnimationFrame(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      });
     }
   }, [messages.length]);
 
   const handleSend = useCallback(async () => {
-    if (!draft.trim() || !client?.connected || !identity || !senderKey || !group)
+    if (!draft.trim() || !client?.connected || !identity || !senderKeyRef.current || !group)
       return;
 
     try {
       const { message, updatedKey } = await groupEncrypt(
-        senderKey,
+        senderKeyRef.current,
         groupId,
         draft.trim(),
       );
-      setSenderKey(updatedKey);
+      senderKeyRef.current = updatedKey;
+      senderKeyCache.set(groupId, updatedKey);
 
-      // Send to all group members
       const recipients = group.members.filter(
         (m) => m !== toBase64(identity.dh.publicKey),
       );
       client.sendGroup(groupId, message, recipients);
 
       const chatMsg: ChatMessage = {
-        id: Date.now().toString(),
+        id: generateMessageId(),
         text: draft.trim(),
         sender: "me",
         timestamp: Date.now(),
         encrypted: true,
       };
-      setMessages((prev) => [...prev, chatMsg]);
       addChatMessage(`group:${groupId}`, chatMsg);
       setDraft("");
     } catch {
       Alert.alert("Error", "Failed to encrypt group message");
     }
-  }, [draft, senderKey, groupId, identity, client, group]);
+  }, [draft, groupId, identity, client, group, addChatMessage]);
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
     >
       {/* Header */}
@@ -131,14 +138,21 @@ export function GroupChatScreen({ groupId, groupName }: GroupChatScreenProps) {
             {group?.members.length ?? 0} members
           </Text>
         </View>
-        <EncryptionBadge compact sealed />
+        <View style={styles.headerRight}>
+          <View
+            style={[
+              styles.connectionDot,
+              { backgroundColor: connected ? Colors.success : Colors.error },
+            ]}
+          />
+          <EncryptionBadge compact sealed />
+        </View>
       </View>
 
       {/* Group E2EE info */}
       <View style={styles.e2eeBanner}>
         <Text style={styles.e2eeText}>
           Group messages use Sender Keys with Ed25519 signatures.
-          Each member's key is independently ratcheted.
         </Text>
       </View>
 
@@ -147,7 +161,7 @@ export function GroupChatScreen({ groupId, groupName }: GroupChatScreenProps) {
         ref={flatListRef}
         data={messages}
         renderItem={({ item }) => (
-          <MessageBubble
+          <MemoizedBubble
             text={item.text}
             sender={item.sender}
             timestamp={item.timestamp}
@@ -157,6 +171,10 @@ export function GroupChatScreen({ groupId, groupName }: GroupChatScreenProps) {
         keyExtractor={(item) => item.id}
         style={styles.messageList}
         contentContainerStyle={styles.messageListContent}
+        removeClippedSubviews={Platform.OS === "android"}
+        initialNumToRender={20}
+        maxToRenderPerBatch={10}
+        windowSize={11}
       />
 
       {/* Input */}
@@ -221,6 +239,16 @@ const styles = StyleSheet.create({
   memberCount: {
     color: Colors.textMuted,
     fontSize: 12,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  connectionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   e2eeBanner: {
     backgroundColor: "rgba(124, 77, 255, 0.06)",

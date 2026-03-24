@@ -11,6 +11,7 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Colors } from "../theme/colors";
 import { useApp } from "../context/AppContext";
@@ -23,7 +24,11 @@ export function OnboardingScreen() {
     setLoading(true);
     try {
       await generateNewIdentity();
-    } catch {
+    } catch (_err) {
+      Alert.alert(
+        "Key Generation Failed",
+        "Could not generate cryptographic identity. Please try again.",
+      );
       setLoading(false);
     }
   };

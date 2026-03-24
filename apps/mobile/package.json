@@ -5,7 +5,7 @@
   "description": "CipherLink E2EE chat — Expo React Native app — by Belkis Aslani",
   "author": "Belkis Aslani",
   "license": "MIT",
-  "main": "expo-router/entry",
+  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -27,7 +27,7 @@
     "react-native-safe-area-context": "4.14.1",
     "react-native-screens": "~4.5.0",
     "libsodium-wrappers-sumo": "^0.8.2",
-    "expo-router": "~55.0.7"
+    "expo-splash-screen": "~0.29.0"
   },
   "devDependencies": {
     "@types/libsodium-wrappers-sumo": "^0.8.2",

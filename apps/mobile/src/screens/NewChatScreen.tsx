@@ -54,7 +54,8 @@ export function NewChatScreen() {
       return;
     }
 
-    await addContact(recipientKey.trim(), contactName.trim());
+    const added = await addContact(recipientKey.trim(), contactName.trim());
+    if (!added) return; // Contact already exists, alert shown by addContact
     navigate({
       name: "chat",
       contactKey: recipientKey.trim(),

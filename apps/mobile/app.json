@@ -24,8 +24,15 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0a0a1a"
       },
-      "permissions": ["INTERNET"],
-      "allowBackup": false
+      "permissions": [
+        "INTERNET",
+        "VIBRATE",
+        "POST_NOTIFICATIONS",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ],
+      "allowBackup": false,
+      "softwareKeyboardLayoutMode": "resize"
     },
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -34,7 +41,11 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-router"
+      ["expo-splash-screen", {
+        "image": "./assets/splash-icon.png",
+        "backgroundColor": "#0a0a1a",
+        "resizeMode": "contain"
+      }]
     ],
     "extra": {
       "eas": {

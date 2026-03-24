@@ -15,15 +15,22 @@
  * @license MIT
  */
 import "react-native-get-random-values";
-import React from "react";
+import React, { useEffect, useCallback } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  BackHandler,
+  Platform,
+  StatusBar as RNStatusBar,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { AppProvider, useApp } from "./src/context/AppContext";
 import type { Tab } from "./src/context/AppContext";
@@ -42,22 +49,39 @@ import { SettingsScreen } from "./src/screens/SettingsScreen";
 import { BackupScreen } from "./src/screens/BackupScreen";
 import { ProfileScreen } from "./src/screens/ProfileScreen";
 
+/** Android status bar height for screens that need manual padding */
+export const STATUSBAR_HEIGHT =
+  Platform.OS === "android" ? (RNStatusBar.currentHeight ?? 24) : 0;
+
 function AppContent() {
-  const { currentScreen, currentTab, setTab, isInitialized, identity } =
+  const { currentScreen, currentTab, setTab, isInitialized, identity, goBack } =
     useApp();
+
+  // Android hardware back button support
+  useEffect(() => {
+    const handler = () => {
+      const isTabScreen = ["chats", "groups", "profile", "settings"].includes(
+        currentScreen.name,
+      );
+      if (currentScreen.name === "onboarding" || isTabScreen) {
+        return false; // Let system handle (exit app)
+      }
+      goBack();
+      return true; // Prevent default
+    };
+    const sub = BackHandler.addEventListener("hardwareBackPress", handler);
+    return () => sub.remove();
+  }, [currentScreen.name, goBack]);
 
   if (!isInitialized) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color={Colors.accent} />
-        <Text style={styles.loadingText}>
-          Initializing encryption...
-        </Text>
+        <Text style={styles.loadingText}>Initializing encryption...</Text>
       </View>
     );
   }
 
-  // Render current screen
   const renderScreen = () => {
     switch (currentScreen.name) {
       case "onboarding":
@@ -102,15 +126,9 @@ function AppContent() {
     }
   };
 
-  // Determine if we should show the tab bar
   const showTabBar =
     identity !== null &&
-    [
-      "chats",
-      "groups",
-      "profile",
-      "settings",
-    ].includes(currentScreen.name);
+    ["chats", "groups", "profile", "settings"].includes(currentScreen.name);
 
   return (
     <View style={styles.root}>
@@ -120,7 +138,7 @@ function AppContent() {
   );
 }
 
-// --- Tab Bar ---
+// --- Tab Bar with bottom safe area ---
 
 interface TabBarProps {
   currentTab: Tab;
@@ -135,8 +153,15 @@ const TABS: { key: Tab; label: string; icon: string }[] = [
 ];
 
 function TabBar({ currentTab, onTabPress }: TabBarProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={tabStyles.container}>
+    <View
+      style={[
+        tabStyles.container,
+        { paddingBottom: Math.max(insets.bottom, 8) },
+      ]}
+    >
       {TABS.map((tab) => {
         const isActive = currentTab === tab.key;
         return (
@@ -145,6 +170,9 @@ function TabBar({ currentTab, onTabPress }: TabBarProps) {
             style={tabStyles.tab}
             onPress={() => onTabPress(tab.key)}
             activeOpacity={0.7}
+            accessibilityRole="tab"
+            accessibilityLabel={tab.label}
+            accessibilityState={{ selected: isActive }}
           >
             <View
               style={[
@@ -162,10 +190,7 @@ function TabBar({ currentTab, onTabPress }: TabBarProps) {
               </Text>
             </View>
             <Text
-              style={[
-                tabStyles.label,
-                isActive && tabStyles.labelActive,
-              ]}
+              style={[tabStyles.label, isActive && tabStyles.labelActive]}
             >
               {tab.label}
             </Text>
@@ -180,12 +205,14 @@ function TabBar({ currentTab, onTabPress }: TabBarProps) {
 
 export default function App() {
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <StatusBar style="light" />
-      <AppProvider>
-        <AppContent />
-      </AppProvider>
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <StatusBar style="light" />
+        <AppProvider>
+          <AppContent />
+        </AppProvider>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -222,7 +249,6 @@ const tabStyles = StyleSheet.create({
     backgroundColor: Colors.bgPrimary,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
-    paddingBottom: 8,
     paddingTop: 6,
   },
   tab: {
