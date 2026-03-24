@@ -291,7 +291,7 @@ export function SettingsScreen() {
             </TouchableOpacity>
           )}
           <Text style={styles.cardNote}>
-            Default: wss://relay.it-handwerk-stuttgart.de{"\n"}
+            Default: wss://relay.cipherlink.app{"\n"}
             You can host your own relay server
           </Text>
         </View>

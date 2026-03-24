@@ -158,7 +158,7 @@ export interface AppSettings {
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
-  serverUrl: "wss://relay.it-handwerk-stuttgart.de",
+  serverUrl: "wss://relay.cipherlink.app",
   sealedSender: true,
   quantumResistant: true,
   messagePadding: true,

@@ -1,7 +1,9 @@
 # CipherLink Relay Server — Self-Hosting Guide
 
 > **Ziel:** CipherLink Relay auf deinem Ubuntu Server hinter Cloudflare Tunnel hosten.
-> **Domain:** `it-handwerk-stuttgart.de` → Subdomain `relay.it-handwerk-stuttgart.de`
+> **Domain:** `yourdomain.de` → Subdomain `relay.yourdomain.de`
+>
+> Ersetze `example.com` / `yourdomain.de` überall durch deine echte Domain.
 
 ---
 
@@ -104,7 +106,7 @@ Drücke `Ctrl+C` um den Dev-Server zu stoppen.
 
 ## Schritt 5: Cloudflare Tunnel konfigurieren
 
-Da du bereits `jellyfin.it-handwerk-stuttgart.de` über Cloudflare Tunnel laufen hast,
+Da du bereits `jellyfin.yourdomain.de` über Cloudflare Tunnel laufen hast,
 brauchst du nur eine **neue Route** hinzufügen.
 
 ### Option A: Cloudflare Dashboard (Zero Trust)
@@ -114,7 +116,7 @@ brauchst du nur eine **neue Route** hinzufügen.
 3. Klicke **Add a public hostname**
 4. Fülle aus:
    - **Subdomain:** `relay`
-   - **Domain:** `it-handwerk-stuttgart.de`
+   - **Domain:** `example.com`
    - **Service Type:** `HTTP`
    - **URL:** `http://localhost:4200`
 5. **Wichtig** — Unter **Additional application settings**:
@@ -132,11 +134,11 @@ Füge unter `ingress` eine neue Regel hinzu (VOR dem catch-all):
 ```yaml
 ingress:
   # Bestehend: Jellyfin
-  - hostname: jellyfin.it-handwerk-stuttgart.de
+  - hostname: jellyfin.yourdomain.de
     service: http://localhost:8096
 
   # NEU: CipherLink Relay
-  - hostname: relay.it-handwerk-stuttgart.de
+  - hostname: relay.example.com
     service: http://localhost:4200
     originRequest:
       noTLSVerify: true
@@ -156,7 +158,7 @@ sudo systemctl restart cloudflared
 In **Cloudflare Dashboard** → **DNS** → prüfe ob es einen CNAME-Eintrag gibt:
 
 ```
-relay.it-handwerk-stuttgart.de → <dein-tunnel-id>.cfargotunnel.com
+relay.example.com → <dein-tunnel-id>.cfargotunnel.com
 ```
 
 Falls nicht automatisch erstellt, füge ihn manuell hinzu:
@@ -225,7 +227,7 @@ sudo journalctl -u cipherlink-relay -f
 
 ```bash
 # WebSocket Verbindung testen (braucht wscat)
-npx wscat -c wss://relay.it-handwerk-stuttgart.de
+npx wscat -c wss://relay.example.com
 # Sende: {"type":"hello","publicKey":"dGVzdA=="}
 # Erwartete Antwort: {"type":"welcome"}
 ```
@@ -233,7 +235,7 @@ npx wscat -c wss://relay.it-handwerk-stuttgart.de
 ### In der CipherLink App:
 
 1. Öffne **Settings** → **Server Connection**
-2. Die URL sollte bereits `wss://relay.it-handwerk-stuttgart.de` sein
+2. Die URL sollte bereits `wss://relay.example.com` sein
 3. Tippe auf **Test Connection**
 4. Grüner Status = Server läuft und ist erreichbar
 5. Tippe auf **Connect**
@@ -261,13 +263,13 @@ sudo ufw status
 ```
 ┌──────────────────────────────────────────────┐
 │  User's Phone (CipherLink App)               │
-│  wss://relay.it-handwerk-stuttgart.de         │
+│  wss://relay.example.com         │
 └──────────────────┬───────────────────────────┘
                    │ HTTPS/WSS (verschlüsselt)
                    ▼
 ┌──────────────────────────────────────────────┐
 │  Cloudflare Edge (TLS-Terminierung)          │
-│  relay.it-handwerk-stuttgart.de               │
+│  relay.example.com               │
 └──────────────────┬───────────────────────────┘
                    │ HTTP/WS (intern, via Tunnel)
                    ▼
