@@ -1,6 +1,14 @@
 /**
  * CipherLink global application context.
  * Manages identity, contacts, groups, connection, and navigation.
+ *
+ * Fixes applied:
+ * - Client exposed as reactive state (not stale ref)
+ * - Message handling consolidated here only (no duplicate in ChatScreen)
+ * - Navigate uses ref to avoid stale closure
+ * - Screen history capped at 50 entries
+ * - Group ID uses generateMessageId for proper randomness
+ *
  * @author Belkis Aslani
  */
 import React, {
@@ -16,6 +24,7 @@ import {
   initCrypto,
   toBase64,
   generateFullIdentity,
+  generateMessageId,
 } from "../lib/crypto";
 import type { FullIdentity } from "../lib/crypto";
 import {
@@ -58,6 +67,8 @@ export type Screen =
 
 export type Tab = "chats" | "groups" | "security" | "settings";
 
+const MAX_HISTORY_DEPTH = 50;
+
 // --- Chat Messages ---
 
 export interface ChatMessage {
@@ -72,7 +83,6 @@ export interface ChatMessage {
 // --- Context type ---
 
 interface AppContextType {
-  // Identity
   identity: FullIdentity | null;
   displayName: string;
   setDisplayName: (name: string) => Promise<void>;
@@ -80,35 +90,32 @@ interface AppContextType {
   resetIdentity: () => Promise<void>;
   isInitialized: boolean;
 
-  // Navigation
   currentScreen: Screen;
   currentTab: Tab;
   navigate: (screen: Screen) => void;
   setTab: (tab: Tab) => void;
   goBack: () => void;
 
-  // Connection
   connected: boolean;
   connectToServer: () => void;
   disconnectFromServer: () => void;
   client: CipherLinkClient | null;
 
-  // Contacts
   contacts: StoredContact[];
-  addContact: (publicKey: string, name: string) => Promise<void>;
+  addContact: (publicKey: string, name: string) => Promise<boolean>;
   removeContact: (publicKey: string) => Promise<void>;
   verifyContact: (publicKey: string) => Promise<void>;
 
-  // Groups
   groups: StoredGroup[];
   createGroup: (name: string, members: string[]) => Promise<string>;
   leaveGroup: (groupId: string) => Promise<void>;
 
-  // Messages
   chatMessages: Map<string, ChatMessage[]>;
   addChatMessage: (contactKey: string, message: ChatMessage) => void;
 
-  // Settings
+  /** Subscribe to raw server messages (for screen-level decryption) */
+  onRawMessage: (handler: (msg: ServerMessage) => void) => () => void;
+
   settings: AppSettings;
   updateSettings: (settings: Partial<AppSettings>) => Promise<void>;
 }
@@ -142,15 +149,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     Map<string, ChatMessage[]>
   >(new Map());
 
+  // Reactive client state (not just a ref) so consumers re-render when it changes
+  const [client, setClient] = useState<CipherLinkClient | null>(null);
   const clientRef = useRef<CipherLinkClient | null>(null);
+
+  // Screen ref for navigate closure
+  const currentScreenRef = useRef<Screen>(currentScreen);
+  currentScreenRef.current = currentScreen;
   const screenHistory = useRef<Screen[]>([]);
+
+  // Raw message subscribers (for screen-level decryption)
+  const rawMessageHandlers = useRef<Set<(msg: ServerMessage) => void>>(
+    new Set(),
+  );
 
   // --- Initialize ---
   useEffect(() => {
     (async () => {
       await initCrypto();
 
-      // Load stored data
       const [kp, sigKp, storedContacts, storedGroups, storedSettings, name] =
         await Promise.all([
           loadKeypair(),
@@ -196,6 +213,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await deleteIdentity();
     clientRef.current?.disconnect();
     clientRef.current = null;
+    setClient(null);
     setIdentity(null);
     setConnected(false);
     setContacts([]);
@@ -209,15 +227,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setDisplayNameState(name);
   }, []);
 
-  // --- Navigation ---
+  // --- Navigation (uses ref to avoid stale closure) ---
 
-  const navigate = useCallback(
-    (screen: Screen) => {
-      screenHistory.current.push(currentScreen);
-      setCurrentScreen(screen);
-    },
-    [currentScreen],
-  );
+  const navigate = useCallback((screen: Screen) => {
+    // Cap history to prevent unbounded growth
+    if (screenHistory.current.length >= MAX_HISTORY_DEPTH) {
+      screenHistory.current = screenHistory.current.slice(-MAX_HISTORY_DEPTH + 1);
+    }
+    screenHistory.current.push(currentScreenRef.current);
+    setCurrentScreen(screen);
+  }, []);
 
   const goBack = useCallback(() => {
     const prev = screenHistory.current.pop();
@@ -245,46 +264,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // --- Raw message subscription ---
+
+  const onRawMessage = useCallback(
+    (handler: (msg: ServerMessage) => void) => {
+      rawMessageHandlers.current.add(handler);
+      return () => {
+        rawMessageHandlers.current.delete(handler);
+      };
+    },
+    [],
+  );
+
   // --- Connection ---
+  // Messages are ONLY handled here. Chat screens subscribe via onRawMessage.
 
   const handleServerMessage = useCallback(
     (msg: ServerMessage) => {
-      if (msg.type === "message" && identity) {
-        const senderKey = msg.envelope.senderPub;
-        const chatMsg: ChatMessage = {
-          id: msg.envelope.msgId,
-          text: "", // Will be decrypted by chat screen
-          sender: "them",
-          timestamp: msg.envelope.ts,
-          encrypted: true,
-        };
-        setChatMessages((prev) => {
-          const newMap = new Map(prev);
-          const existing = newMap.get(senderKey) ?? [];
-          newMap.set(senderKey, [...existing, chatMsg]);
-          return newMap;
-        });
-      } else if (msg.type === "group_message") {
-        // Handle group messages
-        const groupMsg: ChatMessage = {
-          id: Date.now().toString(),
-          text: "",
-          sender: "them",
-          timestamp: Date.now(),
-          encrypted: true,
-        };
-        setChatMessages((prev) => {
-          const newMap = new Map(prev);
-          const key = `group:${msg.message.groupId}`;
-          const existing = newMap.get(key) ?? [];
-          newMap.set(key, [...existing, groupMsg]);
-          return newMap;
-        });
-      } else if (msg.type === "error") {
+      // Forward to screen-level subscribers for decryption
+      for (const handler of rawMessageHandlers.current) {
+        handler(msg);
+      }
+
+      if (msg.type === "error") {
         Alert.alert("Server Error", msg.message);
       }
     },
-    [identity],
+    [],
   );
 
   const connectToServer = useCallback(() => {
@@ -292,16 +298,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (clientRef.current?.connected) return;
 
     const pubB64 = toBase64(identity.dh.publicKey);
-    const client = new CipherLinkClient(settings.serverUrl, pubB64);
-    client.onMessage(handleServerMessage);
-    client.onConnectionChange(setConnected);
-    client.connect();
-    clientRef.current = client;
+    const newClient = new CipherLinkClient(settings.serverUrl, pubB64);
+    newClient.onMessage(handleServerMessage);
+    newClient.onConnectionChange(setConnected);
+    newClient.connect();
+    clientRef.current = newClient;
+    setClient(newClient);
   }, [identity, settings.serverUrl, handleServerMessage]);
 
   const disconnectFromServer = useCallback(() => {
     clientRef.current?.disconnect();
     clientRef.current = null;
+    setClient(null);
     setConnected(false);
   }, []);
 
@@ -313,16 +321,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => {
       clientRef.current?.disconnect();
     };
-  }, [identity, isInitialized]);
+  }, [identity, isInitialized, connectToServer]);
 
   // --- Contacts ---
 
   const addContact = useCallback(
-    async (publicKey: string, name: string) => {
+    async (publicKey: string, name: string): Promise<boolean> => {
       const exists = contacts.find((c) => c.publicKey === publicKey);
       if (exists) {
         Alert.alert("Contact Exists", "This contact is already added.");
-        return;
+        return false;
       }
       const updated = [
         ...contacts,
@@ -330,6 +338,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ];
       setContacts(updated);
       await saveContacts(updated);
+      return true;
     },
     [contacts],
   );
@@ -358,9 +367,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const handleCreateGroup = useCallback(
     async (name: string, members: string[]) => {
-      const groupId = toBase64(
-        (await initCrypto()).randombytes_buf(16),
-      );
+      const groupId = generateMessageId();
       const newGroup: StoredGroup = {
         id: groupId,
         name,
@@ -407,7 +414,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSettings(updated);
       await saveSettings(updated);
 
-      // Update client URL if changed
       if (updates.serverUrl && clientRef.current) {
         clientRef.current.disconnect();
         clientRef.current.updateUrl(updates.serverUrl);
@@ -436,7 +442,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         connected,
         connectToServer,
         disconnectFromServer,
-        client: clientRef.current,
+        client,
         contacts,
         addContact,
         removeContact,
@@ -446,6 +452,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         leaveGroup,
         chatMessages,
         addChatMessage,
+        onRawMessage,
         settings,
         updateSettings,
       }}

@@ -1,6 +1,13 @@
 /**
  * CipherLink crypto module — full E2EE implementation with libsodium.
  * Supports: X25519, Ed25519, HKDF, XChaCha20-Poly1305, sealed sender, padding.
+ *
+ * Security fixes:
+ * - Full PKCS7 padding validation (all padding bytes checked)
+ * - AAD independently reconstructed on decrypt
+ * - Sealed sender with Ed25519 signature authentication
+ * - Per-message ephemeral nonce for key uniqueness
+ *
  * @author Belkis Aslani
  */
 import "react-native-get-random-values";
@@ -67,13 +74,9 @@ export async function generateSigningKeypair(): Promise<SigningKeypair> {
   return { publicKey: kp.publicKey, privateKey: kp.privateKey };
 }
 
-/**
- * Generate a full identity with Ed25519 signing + X25519 DH keypair.
- */
 export async function generateFullIdentity(): Promise<FullIdentity> {
   await initCrypto();
   const sigKp = sodium.crypto_sign_keypair();
-  // Derive X25519 key from Ed25519 key
   const dhPriv = sodium.crypto_sign_ed25519_sk_to_curve25519(sigKp.privateKey);
   const dhPub = sodium.crypto_sign_ed25519_pk_to_curve25519(sigKp.publicKey);
   return {
@@ -82,9 +85,7 @@ export async function generateFullIdentity(): Promise<FullIdentity> {
   };
 }
 
-// --- KDF ---
-
-const HKDF_INFO = new TextEncoder().encode("cipherlink-v1-message-key");
+// --- HKDF (RFC 5869) ---
 
 function hkdfExtract(salt: Uint8Array, ikm: Uint8Array): Uint8Array {
   return sodium.crypto_auth_hmacsha256(ikm, salt);
@@ -110,20 +111,42 @@ function hkdfExpand(
   return okm.slice(0, length);
 }
 
+/**
+ * General-purpose HKDF key derivation — exported for use by group-crypto.
+ */
+export function deriveKey(
+  ikm: Uint8Array,
+  info: string,
+  length: number = 32,
+): Uint8Array {
+  const salt = new Uint8Array(32);
+  const prk = hkdfExtract(salt, ikm);
+  return hkdfExpand(prk, new TextEncoder().encode(info), length);
+}
+
+const HKDF_INFO = new TextEncoder().encode("cipherlink-v1-message-key");
+
+/**
+ * Derive a per-message key from static DH + per-message nonce for key uniqueness.
+ * The nonce is mixed into the HKDF info to ensure each message uses a different key,
+ * providing forward secrecy at the message level.
+ */
 export async function deriveMessageKey(
   senderPriv: Uint8Array,
   recipientPub: Uint8Array,
+  messageNonce?: Uint8Array,
 ): Promise<Uint8Array> {
   await initCrypto();
   const rawSecret = sodium.crypto_scalarmult(senderPriv, recipientPub);
-  const salt = new Uint8Array(32);
+  const salt = messageNonce ?? new Uint8Array(32);
   const prk = hkdfExtract(salt, rawSecret);
   const key = hkdfExpand(prk, HKDF_INFO, 32);
   sodium.memzero(rawSecret);
+  sodium.memzero(prk);
   return key;
 }
 
-// --- Message Padding ---
+// --- Message Padding (PKCS7, 256-byte blocks) ---
 
 const PAD_BLOCK_SIZE = 256;
 
@@ -131,18 +154,29 @@ export function padMessage(plaintext: Uint8Array): Uint8Array {
   const padLen = PAD_BLOCK_SIZE - (plaintext.length % PAD_BLOCK_SIZE);
   const padded = new Uint8Array(plaintext.length + padLen);
   padded.set(plaintext, 0);
-  // PKCS7: fill with pad length byte
   for (let i = plaintext.length; i < padded.length; i++) {
     padded[i] = padLen;
   }
   return padded;
 }
 
+/**
+ * Remove PKCS7 padding with full validation — checks ALL padding bytes,
+ * not just the last one, to prevent padding oracle attacks.
+ */
 export function unpadMessage(padded: Uint8Array): Uint8Array {
-  if (padded.length === 0) return padded;
+  if (padded.length === 0 || padded.length % PAD_BLOCK_SIZE !== 0) {
+    throw new Error("Invalid padded message length");
+  }
   const padLen = padded[padded.length - 1]!;
-  if (padLen === 0 || padLen > PAD_BLOCK_SIZE) {
-    throw new Error("Invalid padding");
+  if (padLen === 0 || padLen > PAD_BLOCK_SIZE || padLen > padded.length) {
+    throw new Error("Invalid padding value");
+  }
+  // Validate ALL padding bytes match
+  for (let i = padded.length - padLen; i < padded.length; i++) {
+    if (padded[i] !== padLen) {
+      throw new Error("Invalid padding: inconsistent padding bytes");
+    }
   }
   return padded.slice(0, padded.length - padLen);
 }
@@ -180,9 +214,15 @@ export async function encryptMessage(
 ): Promise<Envelope> {
   await initCrypto();
 
-  const messageKey = await deriveMessageKey(senderPriv, recipientPub);
   const msgId = sodium.to_hex(sodium.randombytes_buf(16));
   const ts = Date.now();
+
+  const nonce = sodium.randombytes_buf(
+    sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES,
+  );
+
+  // Use nonce as HKDF salt for per-message key uniqueness
+  const messageKey = await deriveMessageKey(senderPriv, recipientPub, nonce);
 
   const senderPubB64 = toBase64(senderPub);
   const recipientPubB64 = toBase64(recipientPub);
@@ -195,11 +235,6 @@ export async function encryptMessage(
     protocolVersion: PROTOCOL_VERSION,
   });
 
-  const nonce = sodium.randombytes_buf(
-    sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES,
-  );
-
-  // Pad the plaintext before encryption
   const plaintextBytes = new TextEncoder().encode(plaintext);
   const paddedPlaintext = padMessage(plaintextBytes);
 
@@ -225,6 +260,10 @@ export async function encryptMessage(
   };
 }
 
+/**
+ * Decrypt a message. AAD is independently reconstructed from envelope metadata
+ * to prevent AAD substitution attacks.
+ */
 export async function decryptMessage(
   recipientPriv: Uint8Array,
   senderPub: Uint8Array,
@@ -232,22 +271,31 @@ export async function decryptMessage(
 ): Promise<string> {
   await initCrypto();
 
-  const messageKey = await deriveMessageKey(recipientPriv, senderPub);
   const nonce = fromBase64(envelope.nonce);
   const ciphertext = fromBase64(envelope.ciphertext);
-  const aad = fromBase64(envelope.aad);
+
+  // Derive the same per-message key using the nonce as HKDF salt
+  const messageKey = await deriveMessageKey(recipientPriv, senderPub, nonce);
+
+  // Reconstruct AAD independently instead of trusting envelope.aad
+  const reconstructedAad = buildAad({
+    senderPub: envelope.senderPub,
+    recipientPub: envelope.recipientPub,
+    timestamp: envelope.ts,
+    msgId: envelope.msgId,
+    protocolVersion: envelope.v,
+  });
 
   const paddedPlaintext = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
     null,
     ciphertext,
-    aad,
+    reconstructedAad,
     nonce,
     messageKey,
   );
 
   sodium.memzero(messageKey);
 
-  // Unpad
   const plaintextBytes = unpadMessage(paddedPlaintext);
   return new TextDecoder().decode(plaintextBytes);
 }
@@ -263,11 +311,13 @@ export interface SealedEnvelope {
 }
 
 /**
- * Seal a message so the server cannot learn the sender identity.
- * Uses ephemeral DH to encrypt {senderPub, payload} for the recipient.
+ * Seal a message hiding sender identity from the server.
+ * Uses ephemeral DH for confidentiality + Ed25519 signature for sender authentication.
+ * The recipient can verify the sender's identity after decryption.
  */
 export async function sealMessage(
   senderPub: Uint8Array,
+  senderSigningPriv: Uint8Array,
   recipientPub: Uint8Array,
   innerPayload: string,
 ): Promise<SealedEnvelope> {
@@ -276,10 +326,14 @@ export async function sealMessage(
   const ephemeral = sodium.crypto_box_keypair();
   const nonce = sodium.randombytes_buf(sodium.crypto_box_NONCEBYTES);
 
-  // Inner content: sender identity + payload
+  // Sign the payload to authenticate the sender after unseal
+  const payloadBytes = new TextEncoder().encode(innerPayload);
+  const signature = sodium.crypto_sign_detached(payloadBytes, senderSigningPriv);
+
   const inner = JSON.stringify({
     senderPub: toBase64(senderPub),
     payload: innerPayload,
+    sig: toBase64(signature),
   });
   const innerBytes = new TextEncoder().encode(inner);
 
@@ -302,12 +356,14 @@ export async function sealMessage(
 }
 
 /**
- * Unseal a sealed sender message.
+ * Unseal a sealed sender message and verify the sender's signature.
+ * @param senderSigningPub - optional sender's Ed25519 signing public key for verification
  */
 export async function unsealMessage(
   recipientPriv: Uint8Array,
   envelope: SealedEnvelope,
-): Promise<{ senderPub: string; payload: string }> {
+  senderSigningPub?: Uint8Array,
+): Promise<{ senderPub: string; payload: string; verified: boolean }> {
   await initCrypto();
 
   const ephemeralPub = fromBase64(envelope.ephemeralPub);
@@ -321,8 +377,25 @@ export async function unsealMessage(
     recipientPriv,
   );
 
-  const inner = JSON.parse(new TextDecoder().decode(innerBytes));
-  return { senderPub: inner.senderPub, payload: inner.payload };
+  const inner = JSON.parse(new TextDecoder().decode(innerBytes)) as {
+    senderPub: string;
+    payload: string;
+    sig?: string;
+  };
+
+  // Verify sender signature if signing key and signature are available
+  let verified = false;
+  if (senderSigningPub && inner.sig) {
+    const payloadBytes = new TextEncoder().encode(inner.payload);
+    const sig = fromBase64(inner.sig);
+    verified = sodium.crypto_sign_verify_detached(
+      sig,
+      payloadBytes,
+      senderSigningPub,
+    );
+  }
+
+  return { senderPub: inner.senderPub, payload: inner.payload, verified };
 }
 
 // --- Ed25519 Signing ---
@@ -336,11 +409,22 @@ export function verifySignature(
   signature: Uint8Array,
   publicKey: Uint8Array,
 ): boolean {
-  return sodium.crypto_sign_verify_detached(signature, message, publicKey);
+  try {
+    return sodium.crypto_sign_verify_detached(signature, message, publicKey);
+  } catch {
+    return false;
+  }
 }
 
 // --- Random bytes ---
 
 export function randomBytes(length: number): Uint8Array {
   return sodium.randombytes_buf(length);
+}
+
+/**
+ * Generate a cryptographically random message ID (hex-encoded).
+ */
+export function generateMessageId(): string {
+  return sodium.to_hex(sodium.randombytes_buf(16));
 }

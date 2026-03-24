@@ -1,9 +1,9 @@
 /**
  * Chat screen — 1:1 E2EE messaging with a contact.
- * Supports standard and sealed sender modes.
+ * Messages are handled via onRawMessage subscription (no duplicate handlers).
  * @author Belkis Aslani
  */
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, memo } from "react";
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ import {
   fromBase64,
   encryptMessage,
   decryptMessage,
+  generateMessageId,
 } from "../lib/crypto";
 import type { ServerMessage } from "../lib/ws-client";
 
@@ -31,6 +32,9 @@ interface ChatScreenProps {
   contactKey: string;
   contactName: string;
 }
+
+/** Memoized message bubble to prevent re-renders of entire list */
+const MemoizedBubble = memo(MessageBubble);
 
 export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
   const {
@@ -42,26 +46,25 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
     settings,
     addChatMessage,
     chatMessages,
+    onRawMessage,
   } = useApp();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const flatListRef = useRef<FlatList>(null);
-  const handlerInstalled = useRef(false);
 
-  // Load existing messages
+  // Load existing messages from context
   useEffect(() => {
     const existing = chatMessages.get(contactKey) ?? [];
     setMessages(existing);
-  }, [contactKey]);
+  }, [contactKey, chatMessages]);
 
-  // Listen for incoming messages
+  // Subscribe to raw server messages for decryption (single handler, proper cleanup)
   useEffect(() => {
-    if (!client || handlerInstalled.current) return;
-    handlerInstalled.current = true;
+    if (!identity) return;
 
-    client.onMessage(async (msg: ServerMessage) => {
-      if (msg.type === "message" && identity) {
+    const unsubscribe = onRawMessage(async (msg: ServerMessage) => {
+      if (msg.type === "message") {
         const envelope = msg.envelope;
         if (envelope.senderPub === contactKey) {
           try {
@@ -78,27 +81,23 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
               timestamp: envelope.ts,
               encrypted: true,
             };
-            setMessages((prev) => [...prev, chatMsg]);
             addChatMessage(contactKey, chatMsg);
           } catch {
-            // Decryption may fail if message is from a different sender
+            // Decryption may fail if key mismatch
           }
         }
       }
     });
 
-    return () => {
-      handlerInstalled.current = false;
-    };
-  }, [client, identity, contactKey]);
+    return unsubscribe;
+  }, [identity, contactKey, onRawMessage, addChatMessage]);
 
   // Auto-scroll on new messages
   useEffect(() => {
     if (messages.length > 0) {
-      setTimeout(
-        () => flatListRef.current?.scrollToEnd({ animated: true }),
-        100,
-      );
+      requestAnimationFrame(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      });
     }
   }, [messages.length]);
 
@@ -107,47 +106,33 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
 
     try {
       const recipientPub = fromBase64(contactKey);
-
-      if (settings.sealedSender) {
-        // Sealed sender: encrypt normally, then seal
-        const envelope = await encryptMessage(
-          identity.dh.privateKey,
-          identity.dh.publicKey,
-          recipientPub,
-          draft.trim(),
-        );
-        // Send as standard for now (sealed sender wrapping)
-        client.send(envelope);
-      } else {
-        const envelope = await encryptMessage(
-          identity.dh.privateKey,
-          identity.dh.publicKey,
-          recipientPub,
-          draft.trim(),
-        );
-        client.send(envelope);
-      }
+      const envelope = await encryptMessage(
+        identity.dh.privateKey,
+        identity.dh.publicKey,
+        recipientPub,
+        draft.trim(),
+      );
+      client.send(envelope);
 
       const chatMsg: ChatMessage = {
-        id: Date.now().toString(),
+        id: generateMessageId(),
         text: draft.trim(),
         sender: "me",
         timestamp: Date.now(),
         encrypted: true,
         sealed: settings.sealedSender,
       };
-      setMessages((prev) => [...prev, chatMsg]);
       addChatMessage(contactKey, chatMsg);
       setDraft("");
     } catch {
       Alert.alert("Error", "Failed to encrypt and send message");
     }
-  }, [draft, contactKey, identity, client, settings.sealedSender]);
+  }, [draft, contactKey, identity, client, settings.sealedSender, addChatMessage]);
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
     >
       {/* Header */}
@@ -170,9 +155,7 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
             style={[
               styles.connectionDot,
               {
-                backgroundColor: connected
-                  ? Colors.success
-                  : Colors.error,
+                backgroundColor: connected ? Colors.success : Colors.error,
               },
             ]}
           />
@@ -193,7 +176,8 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
       {/* E2EE Banner */}
       <View style={styles.e2eeBanner}>
         <Text style={styles.e2eeText}>
-          Messages are end-to-end encrypted. No one outside this chat can read them.
+          Messages are end-to-end encrypted. No one outside this chat can read
+          them.
         </Text>
       </View>
 
@@ -202,7 +186,7 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
         ref={flatListRef}
         data={messages}
         renderItem={({ item }) => (
-          <MessageBubble
+          <MemoizedBubble
             text={item.text}
             sender={item.sender}
             timestamp={item.timestamp}
@@ -212,6 +196,10 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
         keyExtractor={(item) => item.id}
         style={styles.messageList}
         contentContainerStyle={styles.messageListContent}
+        removeClippedSubviews={Platform.OS === "android"}
+        initialNumToRender={20}
+        maxToRenderPerBatch={10}
+        windowSize={11}
       />
 
       {/* Input */}

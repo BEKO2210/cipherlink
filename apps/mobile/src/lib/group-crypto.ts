@@ -2,6 +2,12 @@
  * Group E2EE — Sender Keys protocol with Ed25519 signatures.
  * Each member generates a sender key; group messages are encrypted with
  * a chain-ratcheted symmetric key and signed for authenticity.
+ *
+ * Security fixes:
+ * - AAD binding on group messages (prevents cross-group replay)
+ * - Chain fast-forward limit (prevents DoS via high chainIndex)
+ * - Proper HKDF via deriveKey export from crypto module
+ *
  * @author Belkis Aslani
  */
 import {
@@ -11,7 +17,11 @@ import {
   fromBase64,
   toHex,
   randomBytes,
+  deriveKey,
 } from "./crypto";
+
+/** Maximum chain fast-forward to prevent DoS */
+const MAX_CHAIN_SKIP = 1000;
 
 export interface SenderKey {
   keyId: string;
@@ -76,21 +86,24 @@ export function createSenderKeyDistribution(
 }
 
 /**
- * Derive the next message key from the chain key using HKDF.
+ * Derive the next message key and chain key using HKDF with domain separation.
  */
 function ratchetChainKey(chainKey: Uint8Array): {
   messageKey: Uint8Array;
   nextChainKey: Uint8Array;
 } {
-  // Message key = HMAC(chainKey, 0x01)
-  const msgInput = new Uint8Array([0x01]);
-  const messageKey = sodium.crypto_auth_hmacsha256(msgInput, chainKey);
-
-  // Next chain key = HMAC(chainKey, 0x02)
-  const chainInput = new Uint8Array([0x02]);
-  const nextChainKey = sodium.crypto_auth_hmacsha256(chainInput, chainKey);
-
+  const messageKey = deriveKey(chainKey, "cipherlink-group-msg-key");
+  const nextChainKey = deriveKey(chainKey, "cipherlink-group-chain-next");
   return { messageKey, nextChainKey };
+}
+
+/**
+ * Build AAD for group messages — binds groupId and keyId to prevent cross-group replay.
+ */
+function buildGroupAad(groupId: string, keyId: string, chainIndex: number): Uint8Array {
+  return new TextEncoder().encode(
+    JSON.stringify({ groupId, keyId, chainIndex, protocol: "cipherlink-group-v1" }),
+  );
 }
 
 /**
@@ -109,9 +122,12 @@ export async function groupEncrypt(
   );
   const plaintextBytes = new TextEncoder().encode(plaintext);
 
+  // AAD binds the message to this specific group and chain position
+  const aad = buildGroupAad(groupId, senderKey.keyId, senderKey.chainIndex);
+
   const ciphertext = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
     plaintextBytes,
-    null,
+    aad,
     null,
     nonce,
     messageKey,
@@ -145,6 +161,7 @@ export async function groupEncrypt(
 
 /**
  * Decrypt a group message using the sender's key.
+ * Chain fast-forward is limited to MAX_CHAIN_SKIP to prevent DoS.
  */
 export async function groupDecrypt(
   senderKey: SenderKey,
@@ -156,7 +173,7 @@ export async function groupDecrypt(
   const signature = fromBase64(message.signature);
   const nonce = fromBase64(message.nonce);
 
-  // Verify signature
+  // Verify signature first (before any expensive chain operations)
   const valid = sodium.crypto_sign_verify_detached(
     signature,
     ciphertext,
@@ -164,6 +181,15 @@ export async function groupDecrypt(
   );
   if (!valid) {
     throw new Error("Invalid group message signature");
+  }
+
+  // Enforce chain skip limit to prevent DoS
+  const skip = message.chainIndex - senderKey.chainIndex;
+  if (skip < 0) {
+    throw new Error("Message chain index is behind current state (possible replay)");
+  }
+  if (skip > MAX_CHAIN_SKIP) {
+    throw new Error(`Chain skip too large: ${skip} > ${MAX_CHAIN_SKIP}`);
   }
 
   // Advance chain to the right index
@@ -177,10 +203,13 @@ export async function groupDecrypt(
 
   const { messageKey } = ratchetChainKey(currentKey);
 
+  // Reconstruct AAD for verification
+  const aad = buildGroupAad(message.groupId, message.keyId, message.chainIndex);
+
   const plaintext = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
     null,
     ciphertext,
-    null,
+    aad,
     nonce,
     messageKey,
   );
@@ -200,6 +229,6 @@ export function parseSenderKeyDistribution(
     chainKey: fromBase64(dist.chainKey),
     chainIndex: dist.chainIndex,
     signingPublicKey: fromBase64(dist.signingPublicKey),
-    signingPrivateKey: new Uint8Array(0), // Not available for remote members
+    signingPrivateKey: new Uint8Array(0),
   };
 }

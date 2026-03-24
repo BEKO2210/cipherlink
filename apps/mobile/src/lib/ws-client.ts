@@ -53,6 +53,14 @@ export class CipherLinkClient {
   constructor(url: string, publicKey: string) {
     this.url = url;
     this.publicKey = publicKey;
+
+    // Warn if using unencrypted WebSocket in non-development
+    if (!url.startsWith("wss://") && !url.includes("localhost") && !url.includes("127.0.0.1")) {
+      console.warn(
+        "[CipherLink] WARNING: Using unencrypted ws:// connection. " +
+        "Use wss:// for production to prevent traffic interception.",
+      );
+    }
   }
 
   onMessage(handler: MessageHandler): void {

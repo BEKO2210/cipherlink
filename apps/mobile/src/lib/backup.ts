@@ -66,13 +66,29 @@ export async function createBackup(
 }
 
 /**
+ * Minimum KDF parameters to prevent downgrade attacks.
+ * Payloads with weaker parameters are rejected.
+ */
+const MIN_OPS_LIMIT = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE;
+const MIN_MEM_LIMIT = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE;
+
+/**
  * Restore a backup from encrypted payload.
+ * Enforces minimum KDF parameters to prevent downgrade attacks.
  */
 export async function restoreBackup(
   passphrase: string,
   payload: BackupPayload,
 ): Promise<Record<string, unknown>> {
   await initCrypto();
+
+  // Enforce minimum KDF parameters
+  if (payload.opsLimit < MIN_OPS_LIMIT) {
+    throw new Error("Backup KDF opsLimit below minimum security threshold");
+  }
+  if (payload.memLimit < MIN_MEM_LIMIT) {
+    throw new Error("Backup KDF memLimit below minimum security threshold");
+  }
 
   const salt = fromBase64(payload.salt);
   const nonce = fromBase64(payload.nonce);

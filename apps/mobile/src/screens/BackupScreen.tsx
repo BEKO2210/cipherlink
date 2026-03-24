@@ -234,20 +234,16 @@ export function BackupScreen() {
           {backupData && (
             <View style={styles.outputSection}>
               <Text style={styles.outputTitle}>
-                Encrypted Backup Data
+                Encrypted Backup Created
               </Text>
-              <Text style={styles.outputData} selectable numberOfLines={4}>
-                {backupData}
+              <Text style={styles.outputData} numberOfLines={3}>
+                {backupData.slice(0, 120)}...
               </Text>
-              <TouchableOpacity
-                style={styles.copyButton}
-                onPress={async () => {
-                  await Clipboard.setStringAsync(backupData);
-                  Alert.alert("Copied", "Backup data copied to clipboard");
-                }}
-              >
-                <Text style={styles.copyText}>Copy Backup Data</Text>
-              </TouchableOpacity>
+              <Text style={styles.outputNote}>
+                Backup contains encrypted private keys. For security, backup
+                data is stored on-device only and never copied to the clipboard.
+                Use the recovery code below for key restoration.
+              </Text>
             </View>
           )}
 
@@ -511,7 +507,13 @@ const styles = StyleSheet.create({
     color: Colors.textDim,
     fontSize: 10,
     fontFamily: "monospace",
-    marginBottom: 12,
+    marginBottom: 8,
+  },
+  outputNote: {
+    color: Colors.warning,
+    fontSize: 11,
+    lineHeight: 16,
+    fontStyle: "italic",
   },
   copyButton: {
     alignSelf: "center",
