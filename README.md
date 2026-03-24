@@ -10,7 +10,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-e94560.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/Node.js-20+-339933.svg)](https://nodejs.org/)
-[![Expo](https://img.shields.io/badge/Expo-SDK_52-000020.svg)](https://expo.dev/)
+[![Expo](https://img.shields.io/badge/Expo-SDK_55-000020.svg)](https://expo.dev/)
+[![Android APK](https://img.shields.io/badge/Android-APK_Download-3ddc84.svg)](https://github.com/BEKO2210/cipherlink/releases/latest)
 [![libsodium](https://img.shields.io/badge/Crypto-libsodium-7c4dff.svg)](https://doc.libsodium.org/)
 [![Tests](https://img.shields.io/badge/Tests-156_passing-4caf50.svg)](#testing)
 [![Security Docs](https://img.shields.io/badge/Security-Documented-f5a623.svg)](docs/SECURITY_MODEL.md)
@@ -19,7 +20,7 @@
 
 A security-first E2EE chat implementing the **Signal Protocol** with **v3 production hardening** — post-quantum hybrid KEM, MLS-inspired TreeKEM groups, metadata resistance, key transparency, Shamir key splitting, TLS enforcement, audit-ready security documentation. Zero-knowledge server. 156 passing tests.
 
-[Live Demo](https://beko2210.github.io/cipherlink/) · [Security Model](docs/SECURITY_MODEL.md) · [Threat Model](docs/THREAT_MODEL.md) · [Crypto Design](docs/CRYPTO_LIMITS.md) · [v2 Architecture](docs/SECURITY_ARCHITECTURE_V2.md) · [Audit Pack](docs/audit/)
+[Live Demo](https://beko2210.github.io/cipherlink/) · [Download APK](https://github.com/BEKO2210/cipherlink/releases/latest) · [Security Model](docs/SECURITY_MODEL.md) · [Threat Model](docs/THREAT_MODEL.md) · [Crypto Design](docs/CRYPTO_LIMITS.md) · [v2 Architecture](docs/SECURITY_ARCHITECTURE_V2.md) · [Audit Pack](docs/audit/)
 
 <br />
 

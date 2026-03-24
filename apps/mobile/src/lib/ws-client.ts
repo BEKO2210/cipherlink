@@ -131,47 +131,57 @@ export class CipherLinkClient {
     }, delay);
   }
 
-  /** Send a standard E2EE envelope */
-  send(envelope: Envelope): void {
+  /** Send a standard E2EE envelope. Returns false if not connected. */
+  send(envelope: Envelope): boolean {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ type: "send", envelope }));
+      return true;
     }
+    return false;
   }
 
-  /** Send a sealed sender envelope */
-  sendSealed(envelope: SealedEnvelope): void {
+  /** Send a sealed sender envelope. Returns false if not connected. */
+  sendSealed(envelope: SealedEnvelope): boolean {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ type: "send_sealed", envelope }));
+      return true;
     }
+    return false;
   }
 
-  /** Publish prekey bundle for X3DH */
-  publishPrekeys(bundle: PrekeyBundleData): void {
+  /** Publish prekey bundle for X3DH. Returns false if not connected. */
+  publishPrekeys(bundle: PrekeyBundleData): boolean {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ type: "publish_prekeys", bundle }));
+      return true;
     }
+    return false;
   }
 
-  /** Fetch another user's prekey bundle */
-  fetchPrekeys(targetPublicKey: string): void {
+  /** Fetch another user's prekey bundle. Returns false if not connected. */
+  fetchPrekeys(targetPublicKey: string): boolean {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(
         JSON.stringify({ type: "fetch_prekeys", publicKey: targetPublicKey }),
       );
+      return true;
     }
+    return false;
   }
 
-  /** Send a group message to all recipients */
+  /** Send a group message to all recipients. Returns false if not connected. */
   sendGroup(
     groupId: string,
     message: GroupMessage,
     recipients: string[],
-  ): void {
+  ): boolean {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(
         JSON.stringify({ type: "send_group", groupId, message, recipients }),
       );
+      return true;
     }
+    return false;
   }
 
   disconnect(): void {
