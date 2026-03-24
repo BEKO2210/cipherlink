@@ -36,8 +36,8 @@
       background-size: 60px 60px; animation: gridShift 20s linear infinite; }
     @keyframes gridShift { to { background-position: 60px 60px; } }
     .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-    .particle { position: absolute; width: 4px; height: 4px; background: var(--accent); border-radius: 50%; opacity: 0; animation: pf linear infinite; }
-    @keyframes pf { 0% { opacity:0; transform: translateY(100vh) scale(0); } 10% { opacity:.6; } 90% { opacity:.6; } 100% { opacity:0; transform: translateY(-10vh) scale(1); } }
+    .particle { position: absolute; width: 3px; height: 3px; background: var(--accent); border-radius: 50%; opacity: 0; animation: pf linear infinite; will-change: transform, opacity; }
+    @keyframes pf { 0% { opacity:0; transform: translateY(100vh) scale(0); } 15% { opacity:.35; } 85% { opacity:.35; } 100% { opacity:0; transform: translateY(-10vh) scale(1); } }
 
     /* NAV */
     nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between;
@@ -88,7 +88,7 @@
     .section-label::before { content: ''; width: 24px; height: 2px; background: var(--accent); }
     .section-title { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; line-height: 1.2; }
     .section-desc { color: var(--muted); font-size: 1.05rem; max-width: 600px; margin-bottom: 48px; }
-    .reveal { opacity: 0; transform: translateY(40px); transition: all .7s ease-out; }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1); }
     .reveal.visible { opacity: 1; transform: translateY(0); }
 
     /* P2: MATURITY INDICATOR */
@@ -240,8 +240,8 @@
     .sim-wrapper::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
     .sim-stages { display: flex; flex-direction: column; }
     .sim-stage { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; padding: 24px 0;
-      border-bottom: 1px solid rgba(255,255,255,.04); opacity: 0; transform: translateY(20px); transition: all .6s ease-out; }
-    .sim-stage.visible { opacity: 1; transform: translateY(0); }
+      border-bottom: 1px solid rgba(255,255,255,.04); opacity: 0; transform: translateY(12px) scale(.98); transition: opacity .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1); }
+    .sim-stage.visible { opacity: 1; transform: translateY(0) scale(1); }
     .sim-stage:last-child { border-bottom: none; }
     .sim-device { background: var(--bg3); border: 1px solid rgba(255,255,255,.06); border-radius: var(--rs); padding: 14px 18px;
       font-family: var(--mono); font-size: .78rem; min-height: 65px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; }
@@ -261,9 +261,10 @@
     .sim-progress-step.active { background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
     .sim-progress-step.done { background: var(--success); }
     .sim-popup { background: linear-gradient(135deg, rgba(233,69,96,.08), rgba(15,52,96,.15)); border: 1px solid rgba(233,69,96,.2);
-      border-left: 3px solid var(--accent); border-radius: var(--rs); padding: 14px 18px; margin: 0 0 14px; font-size: .85rem;
-      line-height: 1.6; color: var(--text); opacity: 0; max-height: 0; overflow: hidden; transition: all .6s cubic-bezier(.4,0,.2,1); }
-    .sim-popup.visible { opacity: 1; max-height: 200px; }
+      border-left: 3px solid var(--accent); border-radius: var(--rs); padding: 0 18px; margin: 0 0 14px; font-size: .85rem;
+      line-height: 1.6; color: var(--text); opacity: 0; max-height: 0; overflow: hidden;
+      transition: opacity .4s cubic-bezier(.4,0,.2,1), max-height .5s cubic-bezier(.4,0,.2,1), padding .5s cubic-bezier(.4,0,.2,1); }
+    .sim-popup.visible { opacity: 1; max-height: 250px; padding: 14px 18px; }
     .sim-popup .popup-header { font-weight: 700; font-size: .68rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent);
       margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
 
@@ -728,7 +729,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             View Full Audit Pack
           </a>
-          <a href="SECURITY_ARCHITECTURE_V2.md" class="btn btn-outline">v2 Security Architecture</a>
+          <a href="https://github.com/BEKO2210/cipherlink/blob/main/docs/SECURITY_ARCHITECTURE_V2.md" class="btn btn-outline">v2 Security Architecture</a>
         </div>
       </div>
     </div>
@@ -930,13 +931,12 @@
   <footer>
     <p><span class="author">CipherLink</span> &mdash; End-to-End Encrypted Chat &mdash; by <span class="author">Belkis Aslani</span></p>
     <p style="margin-top:6px;font-size:.75rem;color:var(--dim);">
-      MIT License &mdash; Pre-production prototype &mdash; Independent audit recommended before high-risk use
+      MIT License &mdash; Open-Source Project &mdash; <a href="https://github.com/BEKO2210/cipherlink" target="_blank" style="color:var(--dim);">Source Code on GitHub</a>
     </p>
     <div class="footer-links">
       <a href="impressum.html">Impressum</a>
-      <a href="datenschutz.html">Privacy Policy</a>
+      <a href="datenschutz.html">Datenschutz / Privacy</a>
       <a href="audit/">Audit Pack</a>
-      <a href="SECURITY_ARCHITECTURE_V2.md">Security Architecture</a>
       <a href="https://github.com/BEKO2210/cipherlink/security" target="_blank">Report Vulnerability</a>
       <a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a>
     </div>
@@ -957,10 +957,10 @@
     /* ===== Particles ===== */
     (function() {
       const c = document.getElementById('particles');
-      for (let i = 0; i < 25; i++) {
+      for (let i = 0; i < 18; i++) {
         const p = document.createElement('div'); p.className = 'particle';
-        p.style.left = Math.random()*100+'%'; p.style.animationDuration = (8+Math.random()*12)+'s';
-        p.style.animationDelay = Math.random()*10+'s'; p.style.width = p.style.height = (2+Math.random()*4)+'px';
+        p.style.left = Math.random()*100+'%'; p.style.animationDuration = (12+Math.random()*18)+'s';
+        p.style.animationDelay = Math.random()*15+'s'; p.style.width = p.style.height = (1.5+Math.random()*3)+'px';
         c.appendChild(p);
       }
     })();
@@ -995,9 +995,9 @@
     function rHex(n) { const c='0123456789abcdef'; let s=''; for(let i=0;i<n;i++) s+=c[Math.floor(Math.random()*16)]; return s; }
     function typeText(el,text,speed=45) { return new Promise(r => { el.textContent=''; let i=0; const cur=document.createElement('span'); cur.className='typing-cursor'; el.appendChild(cur);
       const iv=setInterval(()=>{ if(i<text.length){ el.textContent=text.slice(0,i+1); el.appendChild(cur); i++; } else { clearInterval(iv); if(cur.parentNode)cur.remove(); r(); }},speed); }); }
-    function showStage(n) { const s=document.querySelector(`.sim-stage[data-stage="${n}"]`); if(s){ s.classList.add('visible'); s.scrollIntoView({behavior:'smooth',block:'nearest'}); }}
+    function showStage(n) { const s=document.querySelector(`.sim-stage[data-stage="${n}"]`); if(s){ s.classList.add('visible'); }}
     function showPopup(step) { const p=document.getElementById('simPopup'),t=document.getElementById('simPopupTitle'),x=document.getElementById('simPopupText'),info=POPUPS[step]; if(!info)return;
-      p.classList.remove('visible'); void p.offsetHeight; t.textContent=info.title; x.textContent=info.text; p.classList.add('visible'); p.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+      p.classList.remove('visible'); void p.offsetHeight; t.textContent=info.title; x.textContent=info.text; p.classList.add('visible'); }
     function updProg(step,st) { const e=document.querySelector(`.sim-progress-step[data-step="${step}"]`); if(e){ e.classList.remove('active','done'); if(st==='active')e.classList.add('active'); if(st==='done')e.classList.add('done'); }}
     const dly = ms => new Promise(r=>setTimeout(r,ms));
     const simBtn=document.getElementById('simStart'), rstBtn=document.getElementById('simReset');
@@ -1005,6 +1005,7 @@
 
     async function runSim() {
       simBtn.style.display='none'; rstBtn.style.display='inline-flex';
+      document.querySelector('.sim-wrapper').scrollIntoView({behavior:'smooth',block:'center'});
       const aP=rHex(16)+'...',bP=rHex(16)+'...',ss=rHex(16)+'...',mk=rHex(16)+'...',nc=rHex(12)+'...',ct=rHex(32)+'...';
       updProg(1,'active'); showPopup(1); await dly(1500); showStage(1); document.getElementById('alicePlain').classList.add('active');
       await typeText(document.getElementById('alicePlainText'),'Composing message...',50); await dly(600);
