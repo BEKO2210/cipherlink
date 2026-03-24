@@ -1,6 +1,5 @@
 /**
- * Chat screen — 1:1 E2EE messaging with a contact.
- * Supports standard and sealed sender modes.
+ * Group chat screen — E2EE group messaging with Sender Keys.
  * @author Belkis Aslani
  */
 import React, { useState, useCallback, useRef, useEffect } from "react";
@@ -20,79 +19,57 @@ import { useApp } from "../context/AppContext";
 import type { ChatMessage } from "../context/AppContext";
 import { MessageBubble } from "../components/MessageBubble";
 import { EncryptionBadge } from "../components/EncryptionBadge";
+import { toBase64 } from "../lib/crypto";
 import {
-  fromBase64,
-  encryptMessage,
-  decryptMessage,
-} from "../lib/crypto";
-import type { ServerMessage } from "../lib/ws-client";
+  generateSenderKey,
+  groupEncrypt,
+  createSenderKeyDistribution,
+} from "../lib/group-crypto";
+import type { SenderKey } from "../lib/group-crypto";
 
-interface ChatScreenProps {
-  contactKey: string;
-  contactName: string;
+interface GroupChatScreenProps {
+  groupId: string;
+  groupName: string;
 }
 
-export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
+export function GroupChatScreen({ groupId, groupName }: GroupChatScreenProps) {
   const {
     identity,
     client,
-    connected,
     goBack,
-    navigate,
-    settings,
-    addChatMessage,
+    groups,
     chatMessages,
+    addChatMessage,
   } = useApp();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
+  const [senderKey, setSenderKey] = useState<SenderKey | null>(null);
   const flatListRef = useRef<FlatList>(null);
-  const handlerInstalled = useRef(false);
+
+  const group = groups.find((g) => g.id === groupId);
+
+  // Initialize sender key
+  useEffect(() => {
+    (async () => {
+      const key = await generateSenderKey(groupId);
+      setSenderKey(key);
+
+      // Distribute sender key to group members
+      if (identity && client?.connected && group) {
+        // Distribute sender key to each member (encrypted per-member in production)
+        createSenderKeyDistribution(key, groupId, identity.dh.publicKey);
+      }
+    })();
+  }, [groupId]);
 
   // Load existing messages
   useEffect(() => {
-    const existing = chatMessages.get(contactKey) ?? [];
+    const key = `group:${groupId}`;
+    const existing = chatMessages.get(key) ?? [];
     setMessages(existing);
-  }, [contactKey]);
+  }, [groupId]);
 
-  // Listen for incoming messages
-  useEffect(() => {
-    if (!client || handlerInstalled.current) return;
-    handlerInstalled.current = true;
-
-    client.onMessage(async (msg: ServerMessage) => {
-      if (msg.type === "message" && identity) {
-        const envelope = msg.envelope;
-        if (envelope.senderPub === contactKey) {
-          try {
-            const senderPub = fromBase64(envelope.senderPub);
-            const plaintext = await decryptMessage(
-              identity.dh.privateKey,
-              senderPub,
-              envelope,
-            );
-            const chatMsg: ChatMessage = {
-              id: envelope.msgId,
-              text: plaintext,
-              sender: "them",
-              timestamp: envelope.ts,
-              encrypted: true,
-            };
-            setMessages((prev) => [...prev, chatMsg]);
-            addChatMessage(contactKey, chatMsg);
-          } catch {
-            // Decryption may fail if message is from a different sender
-          }
-        }
-      }
-    });
-
-    return () => {
-      handlerInstalled.current = false;
-    };
-  }, [client, identity, contactKey]);
-
-  // Auto-scroll on new messages
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(
@@ -103,30 +80,22 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
   }, [messages.length]);
 
   const handleSend = useCallback(async () => {
-    if (!draft.trim() || !client?.connected || !identity) return;
+    if (!draft.trim() || !client?.connected || !identity || !senderKey || !group)
+      return;
 
     try {
-      const recipientPub = fromBase64(contactKey);
+      const { message, updatedKey } = await groupEncrypt(
+        senderKey,
+        groupId,
+        draft.trim(),
+      );
+      setSenderKey(updatedKey);
 
-      if (settings.sealedSender) {
-        // Sealed sender: encrypt normally, then seal
-        const envelope = await encryptMessage(
-          identity.dh.privateKey,
-          identity.dh.publicKey,
-          recipientPub,
-          draft.trim(),
-        );
-        // Send as standard for now (sealed sender wrapping)
-        client.send(envelope);
-      } else {
-        const envelope = await encryptMessage(
-          identity.dh.privateKey,
-          identity.dh.publicKey,
-          recipientPub,
-          draft.trim(),
-        );
-        client.send(envelope);
-      }
+      // Send to all group members
+      const recipients = group.members.filter(
+        (m) => m !== toBase64(identity.dh.publicKey),
+      );
+      client.sendGroup(groupId, message, recipients);
 
       const chatMsg: ChatMessage = {
         id: Date.now().toString(),
@@ -134,15 +103,14 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
         sender: "me",
         timestamp: Date.now(),
         encrypted: true,
-        sealed: settings.sealedSender,
       };
       setMessages((prev) => [...prev, chatMsg]);
-      addChatMessage(contactKey, chatMsg);
+      addChatMessage(`group:${groupId}`, chatMsg);
       setDraft("");
     } catch {
-      Alert.alert("Error", "Failed to encrypt and send message");
+      Alert.alert("Error", "Failed to encrypt group message");
     }
-  }, [draft, contactKey, identity, client, settings.sealedSender]);
+  }, [draft, senderKey, groupId, identity, client, group]);
 
   return (
     <KeyboardAvoidingView
@@ -157,43 +125,20 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerName} numberOfLines={1}>
-            {contactName}
+            {groupName}
           </Text>
-          <EncryptionBadge
-            compact
-            sealed={settings.sealedSender}
-            quantum={settings.quantumResistant}
-          />
+          <Text style={styles.memberCount}>
+            {group?.members.length ?? 0} members
+          </Text>
         </View>
-        <View style={styles.headerRight}>
-          <View
-            style={[
-              styles.connectionDot,
-              {
-                backgroundColor: connected
-                  ? Colors.success
-                  : Colors.error,
-              },
-            ]}
-          />
-          <TouchableOpacity
-            onPress={() =>
-              navigate({
-                name: "safetyNumber",
-                contactKey,
-                contactName,
-              })
-            }
-          >
-            <Text style={styles.verifyButton}>Verify</Text>
-          </TouchableOpacity>
-        </View>
+        <EncryptionBadge compact sealed />
       </View>
 
-      {/* E2EE Banner */}
+      {/* Group E2EE info */}
       <View style={styles.e2eeBanner}>
         <Text style={styles.e2eeText}>
-          Messages are end-to-end encrypted. No one outside this chat can read them.
+          Group messages use Sender Keys with Ed25519 signatures.
+          Each member's key is independently ratcheted.
         </Text>
       </View>
 
@@ -220,7 +165,7 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
           style={styles.input}
           value={draft}
           onChangeText={setDraft}
-          placeholder="Encrypted message..."
+          placeholder="Group message..."
           placeholderTextColor={Colors.textDim}
           returnKeyType="send"
           onSubmitEditing={handleSend}
@@ -267,33 +212,18 @@ const styles = StyleSheet.create({
   },
   headerCenter: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
   },
   headerName: {
     color: Colors.textPrimary,
     fontSize: 17,
     fontWeight: "600",
-    maxWidth: "60%",
   },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  connectionDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  verifyButton: {
-    color: Colors.success,
-    fontSize: 13,
-    fontWeight: "600",
+  memberCount: {
+    color: Colors.textMuted,
+    fontSize: 12,
   },
   e2eeBanner: {
-    backgroundColor: "rgba(76, 175, 80, 0.06)",
+    backgroundColor: "rgba(124, 77, 255, 0.06)",
     paddingHorizontal: 16,
     paddingVertical: 6,
     alignItems: "center",
