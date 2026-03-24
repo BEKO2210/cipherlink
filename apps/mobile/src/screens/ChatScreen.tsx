@@ -112,7 +112,11 @@ export function ChatScreen({ contactKey, contactName }: ChatScreenProps) {
         recipientPub,
         draft.trim(),
       );
-      client.send(envelope);
+      const sent = client.send(envelope);
+      if (!sent) {
+        Alert.alert("Not Connected", "Message could not be sent. Check your connection.");
+        return;
+      }
 
       const chatMsg: ChatMessage = {
         id: generateMessageId(),
