@@ -158,7 +158,7 @@ export interface AppSettings {
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
-  serverUrl: "ws://localhost:4200",
+  serverUrl: "wss://relay.it-handwerk-stuttgart.de",
   sealedSender: true,
   quantumResistant: true,
   messagePadding: true,
