@@ -3,9 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CipherLink — Datenschutzerklarung</title>
+  <title>CipherLink — Datenschutzerklärung | DSGVO-konforme Datenverarbeitung</title>
+  <meta name="description" content="Datenschutzerklärung für CipherLink — Zero-Knowledge E2EE-Messenger. Erfahren Sie, welche Daten verarbeitet werden und wie Ihre Privatsphäre geschützt wird. DSGVO-konform." />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#e94560" />
+  <link rel="canonical" href="https://beko2210.github.io/cipherlink/datenschutz.html" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/logo-192.png" />
+  <link rel="apple-touch-icon" href="assets/logo-192.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="CipherLink — Datenschutzerklärung" />
+  <meta property="og:description" content="Zero-Knowledge-Architektur. Keine Cookies, kein Tracking. DSGVO-konforme Datenverarbeitung." />
+  <meta property="og:image" content="https://beko2210.github.io/cipherlink/assets/logo-512.png" />
+  <meta property="og:url" content="https://beko2210.github.io/cipherlink/datenschutz.html" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -14,10 +27,15 @@
       --text: #eaeaea; --text-muted: #8888aa; --text-dim: #555577;
       --success: #4caf50; --warning: #f5a623;
       --radius: 16px; --radius-sm: 10px;
-      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
     html { scroll-behavior: smooth; }
     body { font-family: var(--font); background: var(--bg-primary); color: var(--text); line-height: 1.8; min-height: 100vh; }
+    .skip-link { position: absolute; top: -100px; left: 16px; background: var(--accent); color: #fff; padding: 8px 16px; border-radius: 0 0 8px 8px; z-index: 999; font-weight: 600; transition: top .2s; }
+    .skip-link:focus { top: 0; }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    @media print { .bg-grid, nav, .skip-link { display: none !important; } body { background: #fff; color: #000; } a { color: #000; text-decoration: underline; } }
     a { color: var(--accent); text-decoration: none; transition: opacity .2s; }
     a:hover { opacity: .8; }
     .bg-grid {
@@ -105,19 +123,23 @@
   </style>
 </head>
 <body>
-  <div class="bg-grid"></div>
-  <nav>
+  <a href="#main" class="skip-link">Zum Inhalt springen</a>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <header>
+  <nav aria-label="Navigation">
     <div class="nav-logo">
-      <img src="assets/logo-192.png" alt="CipherLink" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;border-radius:6px;" />
+      <img src="assets/logo-192.png" alt="CipherLink" width="32" height="32" style="vertical-align:middle;margin-right:8px;border-radius:6px;" />
       <span>Cipher</span>Link
     </div>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="impressum.html">Impressum</a></li>
-      <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
+      <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank" rel="noopener noreferrer">GitHub</a></li>
     </ul>
   </nav>
+  </header>
 
+  <main id="main">
   <div class="container">
     <a href="index.html" class="back-link">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
@@ -127,7 +149,7 @@
     <h1><span class="gradient">Datenschutzerklarung</span></h1>
     <p class="subtitle">Gemäß Art. 13, 14 DSGVO | Stand: März 2026</p>
 
-    <div class="legal-section">
+    <div class="legal-section reveal">
       <h2>1. Verantwortlicher</h2>
       <p>
         Verantwortlich für die Datenverarbeitung auf dieser Website ist:<br>
@@ -138,7 +160,7 @@
       </p>
     </div>
 
-    <div class="legal-section">
+    <div class="legal-section reveal">
       <h2>2. Zero-Knowledge-Architektur</h2>
       <div class="zk-box">
         <div class="label">Designprinzip: Zero Knowledge</div>
@@ -159,7 +181,7 @@
       </div>
     </div>
 
-    <div class="legal-section">
+    <div class="legal-section reveal">
       <h2>3. Datenverarbeitung auf der Website</h2>
       <h3>3.1 GitHub Pages Hosting</h3>
       <p>
@@ -185,7 +207,7 @@
       </p>
     </div>
 
-    <div class="legal-section">
+    <div class="legal-section reveal">
       <h2>4. Datenverarbeitung durch den CipherLink-Server</h2>
       <p>
         Wenn Sie die CipherLink-App nutzen (nicht die Website), verarbeitet der Relay-Server
@@ -239,7 +261,7 @@
       </div>
     </div>
 
-    <div class="legal-section">
+    <div class="legal-section reveal">
       <h2>5. Schutzmaßnahmen</h2>
       <ul>
         <li><strong>TLS-Durchsetzung:</strong> In Produktionsumgebungen werden ausschließlich wss://-Verbindungen akzeptiert</li>
@@ -250,7 +272,7 @@
       </ul>
     </div>
 
-    <div class="legal-section">
+    <div class="legal-section reveal">
       <h2>6. Drittlandubermittlung</h2>
       <p>
         Da GitHub Pages (USA) als Hosting-Dienst verwendet wird, konnen personenbezogene Daten
@@ -260,7 +282,7 @@
       </p>
     </div>
 
-    <div class="legal-section">
+    <div class="legal-section reveal">
       <h2>7. Ihre Rechte</h2>
       <p>Gemaß DSGVO haben Sie folgende Rechte:</p>
       <ul>
@@ -277,7 +299,7 @@
       </p>
     </div>
 
-    <div class="legal-section">
+    <div class="legal-section reveal">
       <h2>8. Open-Source-Transparenz</h2>
       <p>
         Der gesamte Quellcode von CipherLink — einschließlich Server, Kryptographie-Bibliothek und
@@ -289,7 +311,7 @@
       </p>
     </div>
 
-    <div class="legal-section">
+    <div class="legal-section reveal">
       <h2>9. Anderungen</h2>
       <p>
         Diese Datenschutzerklarung kann bei Weiterentwicklung des Projekts aktualisiert werden.
@@ -297,8 +319,9 @@
       </p>
     </div>
   </div>
+  </main>
 
-  <footer>
+  <footer role="contentinfo">
     <p><span class="author">CipherLink</span> &mdash; Ende-zu-Ende verschlüsselter Chat &mdash; von <span class="author">Belkis Aslani</span></p>
     <p style="margin-top:6px;font-size:.75rem;color:var(--text-dim);">
       MIT-Lizenz &mdash; Open-Source-Projekt &mdash; <a href="https://github.com/BEKO2210/cipherlink" target="_blank" style="color:var(--text-dim);">Quellcode auf GitHub</a>
@@ -311,5 +334,9 @@
       <a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a>
     </div>
   </footer>
+  <script>
+    const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  </script>
 </body>
 </html>

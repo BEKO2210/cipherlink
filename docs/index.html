@@ -3,14 +3,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CipherLink — End-to-End Encrypted Chat</title>
-  <meta name="description" content="CipherLink: Open-source E2EE messenger with Signal Protocol, post-quantum protection, and zero-knowledge server. 156 tests. Audit-ready." />
+  <title>CipherLink — End-to-End Encrypted Chat | Signal Protocol + Post-Quantum</title>
+  <meta name="description" content="CipherLink: Open-source E2EE messenger with Signal Protocol, post-quantum hybrid KEM (X25519 + ML-KEM-768), zero-knowledge server, and 156 security tests. Audit-ready. By Belkis Aslani." />
+  <meta name="keywords" content="encrypted messenger, E2EE, Signal Protocol, post-quantum, zero-knowledge, open source, privacy, secure chat, X3DH, Double Ratchet, TreeKEM" />
+  <meta name="author" content="Belkis Aslani" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#e94560" />
+  <link rel="canonical" href="https://beko2210.github.io/cipherlink/" />
+  <link rel="alternate" hreflang="en" href="https://beko2210.github.io/cipherlink/index.html" />
+  <link rel="alternate" hreflang="de" href="https://beko2210.github.io/cipherlink/de.html" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/logo-192.png" />
   <link rel="apple-touch-icon" href="assets/logo-192.png" />
-  <meta property="og:image" content="assets/logo-512.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://beko2210.github.io/cipherlink/" />
+  <meta property="og:site_name" content="CipherLink" />
+  <meta property="og:image" content="https://beko2210.github.io/cipherlink/assets/logo-512.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
   <meta property="og:title" content="CipherLink — End-to-End Encrypted Chat" />
   <meta property="og:description" content="Signal Protocol + post-quantum hybrid KEM. Zero-knowledge server. 156 tests. Open source." />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="de_DE" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="CipherLink — End-to-End Encrypted Chat" />
+  <meta name="twitter:description" content="Open-source E2EE messenger with Signal Protocol, post-quantum protection, and zero-knowledge server." />
+  <meta name="twitter:image" content="https://beko2210.github.io/cipherlink/assets/logo-512.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "CipherLink",
+    "description": "Open-source end-to-end encrypted messenger with Signal Protocol, post-quantum hybrid KEM, and zero-knowledge server architecture.",
+    "applicationCategory": "CommunicationApplication",
+    "operatingSystem": "Android, iOS",
+    "url": "https://beko2210.github.io/cipherlink/",
+    "downloadUrl": "https://github.com/BEKO2210/cipherlink/releases/latest/download/cipherlink-v1.0.0.apk",
+    "softwareVersion": "1.0.0",
+    "license": "https://opensource.org/licenses/MIT",
+    "author": {
+      "@type": "Person",
+      "name": "Belkis Aslani",
+      "url": "https://github.com/BEKO2210"
+    },
+    "codeRepository": "https://github.com/BEKO2210/cipherlink",
+    "programmingLanguage": ["TypeScript"],
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -20,7 +68,7 @@
       --text: #eaeaea; --muted: #8888aa; --dim: #555577;
       --success: #4caf50; --warn: #f5a623;
       --r: 16px; --rs: 10px;
-      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
       --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
     }
     html { scroll-behavior: smooth; }
@@ -29,6 +77,44 @@
     a:hover { opacity: .8; }
     section { position: relative; z-index: 1; }
     .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* SKIP LINK */
+    .skip-link { position: absolute; top: -100px; left: 16px; background: var(--accent); color: #fff; padding: 8px 16px; border-radius: 0 0 8px 8px; z-index: 999; font-weight: 600; transition: top .2s; }
+    .skip-link:focus { top: 0; }
+
+    /* ENHANCED ANIMATIONS */
+    .reveal { opacity: 0; transform: translateY(40px); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .stagger-1 { transition-delay: .1s !important; }
+    .stagger-2 { transition-delay: .2s !important; }
+    .stagger-3 { transition-delay: .3s !important; }
+    .stagger-4 { transition-delay: .4s !important; }
+    .stagger-5 { transition-delay: .5s !important; }
+
+    /* 3D CARD HOVER */
+    .card-3d { transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s; transform-style: preserve-3d; }
+    .card-3d:hover { transform: perspective(800px) rotateX(2deg) rotateY(-2deg) translateY(-8px); box-shadow: 0 25px 50px rgba(0,0,0,.4); }
+
+    /* GLOW PULSE */
+    @keyframes glowPulse { 0%,100% { box-shadow: 0 0 20px rgba(233,69,96,.15); } 50% { box-shadow: 0 0 40px rgba(233,69,96,.3); } }
+
+    /* GRADIENT ANIMATION */
+    @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .animated-gradient { background-size: 200% 200%; animation: gradientShift 4s ease infinite; }
+
+    /* FLOAT */
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+    /* BLOB */
+    @keyframes blob { 0%,100% { border-radius: 60% 40% 30% 70%/60% 30% 70% 40%; } 50% { border-radius: 30% 60% 70% 40%/50% 60% 30% 60%; } }
+    .hero-blob { position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(233,69,96,.08) 0%, transparent 70%); animation: blob 8s ease-in-out infinite; pointer-events: none; z-index: 0; }
+    .hero-blob-2 { position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(15,52,96,.12) 0%, transparent 70%); animation: blob 10s ease-in-out infinite reverse; pointer-events: none; z-index: 0; }
+
+    /* CONTENT VISIBILITY FOR BELOW-FOLD */
+    .below-fold { content-visibility: auto; contain-intrinsic-size: auto 600px; }
+
+    /* PRINT STYLES */
+    @media print { .bg-grid, .particles, nav, .hero-blob, .hero-blob-2, .skip-link { display: none !important; } body { background: #fff; color: #000; } .container { max-width: 100%; } a { color: #000; text-decoration: underline; } }
 
     /* BG */
     .bg-grid { position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -88,8 +174,7 @@
     .section-label::before { content: ''; width: 24px; height: 2px; background: var(--accent); }
     .section-title { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; line-height: 1.2; }
     .section-desc { color: var(--muted); font-size: 1.05rem; max-width: 600px; margin-bottom: 48px; }
-    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1); }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
+    /* legacy reveal classes now handled by enhanced .reveal above */
 
     /* P2: MATURITY INDICATOR */
     .maturity-section { padding: 60px 0 0; }
@@ -109,7 +194,7 @@
     .trust-section { padding: 60px 0; }
     .trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
     .trust-card { background: var(--bg2); border: 1px solid rgba(255,255,255,.06); border-radius: var(--rs); padding: 24px; text-align: center; transition: all .3s; }
-    .trust-card:hover { border-color: rgba(233,69,96,.2); transform: translateY(-3px); }
+    .trust-card:hover { border-color: rgba(233,69,96,.2); transform: perspective(800px) rotateX(2deg) rotateY(-2deg) translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,.3); }
     .trust-num { font-size: 2rem; font-weight: 900; color: var(--accent); margin-bottom: 4px; }
     .trust-label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
     .trust-sub { font-size: .7rem; color: var(--dim); margin-top: 4px; }
@@ -129,7 +214,7 @@
     .feat-card { background: var(--bg2); border: 1px solid rgba(255,255,255,.05); border-radius: var(--r); padding: 28px 24px; transition: all .3s; position: relative; overflow: hidden; }
     .feat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .4s; }
     .feat-card:hover::before { transform: scaleX(1); }
-    .feat-card:hover { border-color: rgba(233,69,96,.2); transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,.3); }
+    .feat-card:hover { border-color: rgba(233,69,96,.2); transform: perspective(800px) rotateX(2deg) rotateY(-2deg) translateY(-8px); box-shadow: 0 25px 50px rgba(0,0,0,.4); }
     .feat-icon { width: 44px; height: 44px; background: rgba(233,69,96,.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
     .feat-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
     .feat-card p { color: var(--muted); font-size: .85rem; line-height: 1.55; }
@@ -220,7 +305,7 @@
     .download-section { padding: 80px 0; }
     .download-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
     .dl-card { background: var(--bg2); border: 1px solid rgba(255,255,255,.06); border-radius: var(--r); padding: 32px 24px; text-align: center; transition: all .3s; }
-    .dl-card:hover { border-color: rgba(233,69,96,.2); transform: translateY(-3px); }
+    .dl-card:hover { border-color: rgba(233,69,96,.2); transform: perspective(800px) rotateX(2deg) rotateY(-2deg) translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,.3); }
     .dl-icon { font-size: 2.5rem; margin-bottom: 12px; }
     .dl-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
     .dl-card p { font-size: .8rem; color: var(--muted); margin-bottom: 16px; }
@@ -296,13 +381,15 @@
   </style>
 </head>
 <body>
-  <div class="bg-grid"></div>
-  <div class="particles" id="particles"></div>
+  <a href="#main" class="skip-link">Skip to content</a>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="particles" id="particles" aria-hidden="true"></div>
 
   <!-- NAV -->
-  <nav id="nav">
+  <header>
+  <nav id="nav" aria-label="Main navigation">
     <div class="nav-logo">
-      <img src="assets/logo-192.png" alt="CipherLink Logo" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;border-radius:6px;" />
+      <img src="assets/logo-192.png" alt="CipherLink Logo" width="32" height="32" style="vertical-align:middle;margin-right:8px;border-radius:6px;" />
       <span>Cipher</span>Link
     </div>
     <div class="nav-right">
@@ -312,7 +399,7 @@
         <li><a href="#roadmap">Roadmap</a></li>
         <li><a href="#download">Download</a></li>
         <li><a href="audit/">Audit Pack</a></li>
-        <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a></li>
+        <li><a href="https://github.com/BEKO2210/cipherlink" target="_blank" rel="noopener noreferrer">GitHub</a></li>
       </ul>
       <div class="lang-switch" id="langSwitch">
         <span class="slider" id="langSlider"></span>
@@ -321,12 +408,16 @@
       </div>
     </div>
   </nav>
+  </header>
 
-  <!-- HERO (P1: condensed, P0: disclaimer under CTA) -->
-  <section class="hero">
-    <div>
-      <div class="hero-badge"><span class="dot"></span> Open-Source E2EE Messenger</div>
-      <h1>Messages that<br><span class="gradient">only you can read</span></h1>
+  <main id="main">
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div style="position:relative;">
+      <div class="hero-blob" style="top:-200px;left:-200px;" aria-hidden="true"></div>
+      <div class="hero-blob-2" style="top:-100px;right:-150px;" aria-hidden="true"></div>
+      <div class="hero-badge" style="animation:glowPulse 3s ease-in-out infinite;"><span class="dot"></span> Open-Source E2EE Messenger</div>
+      <h1 id="hero-heading">Messages that<br><span class="gradient animated-gradient" style="background-image:linear-gradient(135deg, var(--accent) 0%, #ff6b8a 25%, #c23152 50%, #ff6b8a 75%, var(--accent) 100%);">only you can read</span></h1>
       <p class="hero-sub">
         End-to-end encrypted chat built on the Signal Protocol with post-quantum protection,
         a zero-knowledge relay server, and 156 automated security tests. Fully open source.
@@ -336,7 +427,7 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           See How It Works
         </a>
-        <a href="https://github.com/BEKO2210/cipherlink" target="_blank" class="btn btn-outline">
+        <a href="https://github.com/BEKO2210/cipherlink" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
           View on GitHub
         </a>
@@ -352,8 +443,8 @@
     </div>
   </section>
 
-  <!-- P2: MATURITY INDICATOR -->
-  <section class="maturity-section">
+  <!-- MATURITY INDICATOR -->
+  <section class="maturity-section below-fold" aria-label="Production readiness">
     <div class="container">
       <div class="maturity-card reveal">
         <div class="maturity-header">
@@ -376,8 +467,8 @@
     </div>
   </section>
 
-  <!-- P0: TRUST SIGNALS -->
-  <section class="trust-section">
+  <!-- TRUST SIGNALS -->
+  <section class="trust-section below-fold" aria-label="Trust indicators">
     <div class="container">
       <div class="trust-grid reveal">
         <div class="trust-card">
@@ -405,14 +496,14 @@
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <div class="trust-label">Bug Bounty</div>
-          <div class="trust-sub"><a href="https://github.com/BEKO2210/cipherlink/security" target="_blank">Report via GitHub Security</a></div>
+          <div class="trust-sub"><a href="https://github.com/BEKO2210/cipherlink/security" target="_blank" rel="noopener noreferrer">Report via GitHub Security</a></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- P1: TAB SYSTEM -->
-  <section class="tabs-section" id="features">
+  <!-- FEATURES TAB SYSTEM -->
+  <section class="tabs-section below-fold" id="features" aria-label="Features">
     <div class="container">
       <div class="reveal">
         <div class="section-label">Features</div>
@@ -736,7 +827,7 @@
   </section>
 
   <!-- E2EE SIMULATION -->
-  <section class="sim-section" id="demo">
+  <section class="sim-section below-fold" id="demo" aria-label="Encryption demo">
     <div class="container">
       <div class="reveal">
         <div class="section-label">Interactive Demo</div>
@@ -802,8 +893,8 @@
     </div>
   </section>
 
-  <!-- P2: ROADMAP -->
-  <section class="roadmap-section" id="roadmap">
+  <!-- ROADMAP -->
+  <section class="roadmap-section below-fold" id="roadmap" aria-label="Roadmap">
     <div class="container">
       <div class="reveal">
         <div class="section-label">Roadmap</div>
@@ -845,8 +936,8 @@
     </div>
   </section>
 
-  <!-- P2: DOWNLOAD -->
-  <section class="download-section" id="download">
+  <!-- DOWNLOAD -->
+  <section class="download-section below-fold" id="download" aria-label="Download">
     <div class="container">
       <div class="reveal">
         <div class="section-label">Download</div>
@@ -860,7 +951,7 @@
           </div>
           <h3>Source Code</h3>
           <p>Clone the repo and build locally.</p>
-          <a href="https://github.com/BEKO2210/cipherlink" target="_blank" class="dl-link">GitHub Repository</a>
+          <a href="https://github.com/BEKO2210/cipherlink" target="_blank" rel="noopener noreferrer" class="dl-link">GitHub Repository</a>
         </div>
         <div class="dl-card">
           <div class="dl-icon">
@@ -890,8 +981,8 @@
     </div>
   </section>
 
-  <!-- P3: SECURITY HALL OF FAME -->
-  <section class="hof-section">
+  <!-- SECURITY HALL OF FAME -->
+  <section class="hof-section below-fold" aria-label="Hall of Fame">
     <div class="container">
       <div class="hof-card reveal">
         <h3>
@@ -900,19 +991,19 @@
         </h3>
         <p>We recognize security researchers who responsibly disclose vulnerabilities.</p>
         <p class="hof-empty">No submissions yet. Be the first!</p>
-        <a href="https://github.com/BEKO2210/cipherlink/security" target="_blank" class="btn btn-outline" style="margin-top:12px;font-size:.85rem;">
+        <a href="https://github.com/BEKO2210/cipherlink/security" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="margin-top:12px;font-size:.85rem;">
           Report a Vulnerability
         </a>
       </div>
     </div>
   </section>
 
-  <!-- P3: SOCIAL PROOF -->
-  <section style="padding:40px 0 80px;">
+  <!-- SOCIAL PROOF -->
+  <section style="padding:40px 0 80px;" aria-label="References">
     <div class="container">
       <div style="text-align:center;" class="reveal">
         <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;align-items:center;">
-          <a href="https://github.com/BEKO2210/cipherlink" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:50px;padding:10px 20px;font-size:.85rem;color:var(--text);transition:all .3s;">
+          <a href="https://github.com/BEKO2210/cipherlink" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:50px;padding:10px 20px;font-size:.85rem;color:var(--text);transition:all .3s;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
             Star on GitHub
           </a>
@@ -927,18 +1018,20 @@
     </div>
   </section>
 
+  </main>
+
   <!-- FOOTER -->
-  <footer>
+  <footer role="contentinfo">
     <p><span class="author">CipherLink</span> &mdash; End-to-End Encrypted Chat &mdash; by <span class="author">Belkis Aslani</span></p>
     <p style="margin-top:6px;font-size:.75rem;color:var(--dim);">
-      MIT License &mdash; Open-Source Project &mdash; <a href="https://github.com/BEKO2210/cipherlink" target="_blank" style="color:var(--dim);">Source Code on GitHub</a>
+      MIT License &mdash; Open-Source Project &mdash; <a href="https://github.com/BEKO2210/cipherlink" target="_blank" rel="noopener noreferrer" style="color:var(--dim);">Source Code on GitHub</a>
     </p>
     <div class="footer-links">
       <a href="impressum.html">Impressum</a>
       <a href="datenschutz.html">Datenschutz / Privacy</a>
       <a href="audit/">Audit Pack</a>
-      <a href="https://github.com/BEKO2210/cipherlink/security" target="_blank">Report Vulnerability</a>
-      <a href="https://github.com/BEKO2210/cipherlink" target="_blank">GitHub</a>
+      <a href="https://github.com/BEKO2210/cipherlink/security" target="_blank" rel="noopener noreferrer">Report Vulnerability</a>
+      <a href="https://github.com/BEKO2210/cipherlink" target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
   </footer>
 
@@ -968,9 +1061,50 @@
     /* ===== Nav shadow ===== */
     window.addEventListener('scroll', () => { document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50); });
 
-    /* ===== Scroll reveal ===== */
-    const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    /* ===== Scroll reveal with stagger ===== */
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          /* Stagger child cards */
+          e.target.querySelectorAll('.feat-card, .trust-card, .dl-card, .stack-item, .feature-card').forEach((card, i) => {
+            card.style.transitionDelay = (i * 0.08) + 's';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          });
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
     document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+    /* ===== Animated counters ===== */
+    const counterObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting && !e.target.dataset.counted) {
+          e.target.dataset.counted = 'true';
+          const target = parseInt(e.target.textContent);
+          if (isNaN(target)) return;
+          const suffix = e.target.textContent.replace(/[0-9]/g, '');
+          let current = 0;
+          const step = Math.ceil(target / 40);
+          const timer = setInterval(() => {
+            current += step;
+            if (current >= target) { current = target; clearInterval(timer); }
+            e.target.textContent = current + suffix;
+          }, 30);
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.trust-num').forEach(el => {
+      if (/^\d+%?$/.test(el.textContent.trim())) counterObs.observe(el);
+    });
+
+    /* ===== Card entrance animation setup ===== */
+    document.querySelectorAll('.feat-card, .trust-card, .dl-card, .stack-item').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1)';
+    });
 
     /* ===== Tabs ===== */
     document.querySelectorAll('.tab-btn').forEach(btn => {
