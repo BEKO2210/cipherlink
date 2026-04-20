@@ -20,7 +20,7 @@
     "expo": "~55.0.8",
     "expo-clipboard": "~55.0.9",
     "expo-secure-store": "~55.0.9",
-    "expo-splash-screen": "~0.29.24",
+    "expo-splash-screen": "~55.0.18",
     "expo-status-bar": "~3.0.9",
     "libsodium-wrappers-sumo": "^0.8.2",
     "react": "19.2.4",
