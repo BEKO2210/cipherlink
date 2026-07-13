@@ -17,7 +17,7 @@
     "build:production": "eas build --platform android --profile production"
   },
   "dependencies": {
-    "expo": "~55.0.15",
+    "expo": "~57.0.4",
     "expo-clipboard": "~55.0.13",
     "expo-secure-store": "~55.0.13",
     "expo-splash-screen": "~0.29.24",
