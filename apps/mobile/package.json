@@ -27,7 +27,7 @@
     "react-native": "0.83.1",
     "react-native-get-random-values": "~2.0.0",
     "react-native-safe-area-context": "~5.7.0",
-    "react-native-screens": "~4.24.0"
+    "react-native-screens": "~4.26.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
